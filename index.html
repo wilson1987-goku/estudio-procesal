@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio Procesal</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#1d4ed8">
+<style>
+/* Layout: columna única de lectura; pestañas arriba, una tarea a la vez. */
+:root{
+  --bg:#f4f6fa; --surface:#ffffff; --raise:#eef2f9; --line:#d8dfec; --ink:#162033; --muted:#5c6a82;
+  --accent:#1d4ed8; --on-accent:#ffffff; --good:#15803d; --bad:#b91c1c; --warm:#b45309;
+  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f1522; --surface:#182032; --raise:#212b42; --line:#2c3854; --ink:#e8edf7; --muted:#9aa7bd;
+    --accent:#7aa2ff; --on-accent:#0b1220; --good:#4ade80; --bad:#f87171; --warm:#fbbf24; color-scheme:dark; }
+}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font)}
+main{max-width:760px;margin:0 auto;padding:18px 16px 70px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:24px;margin:0} h2{font-size:18px;margin:0} h3{font-size:15px;margin:0}
+p{margin:0} .sub{color:var(--muted);font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .grow{flex:1 1 200px;min-width:0}
+button,.btn{background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;text-align:center}
+button:hover{border-color:var(--muted)} button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=text],select,textarea{background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;width:100%;min-width:0}
+textarea{min-height:70px;resize:vertical}
+nav{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{border:0;background:none;border-radius:0;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;padding:10px 12px}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--raise);border-radius:8px;padding:10px 12px}
+.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.stat b{font-size:22px;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.done{color:var(--good);font-weight:600}
+ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;font-weight:400;line-height:1.4}
+.opts button.ok{border-color:var(--good);box-shadow:inset 4px 0 0 var(--good)}
+.opts button.no{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}
+.fb{background:var(--raise);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.fb b.ok{color:var(--good)} .fb b.no{color:var(--bad)}
+.norma{font-size:13px;color:var(--muted);font-weight:600}
+.bar{height:8px;background:var(--raise);border-radius:4px;overflow:hidden} .bar i{display:block;height:100%;background:var(--accent)}
+.prog{height:5px;background:var(--raise);border-radius:3px;overflow:hidden} .prog i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.arearow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:14px}
+.arearow .bar{grid-column:1/-1}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:300px}
+.cal i{aspect-ratio:1;border-radius:5px;background:var(--raise);display:block}
+.cal i.on{background:var(--accent)} .cal i.today{outline:2px solid var(--warm);outline-offset:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips label{border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:14px;cursor:pointer;background:var(--raise)}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label:has(input:checked){border-color:var(--accent);color:var(--accent);font-weight:600}
+.chips label:has(input:focus-visible){outline:2px solid var(--accent)}
+.nov{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.nov:first-of-type{border-top:0;padding-top:0}
+a{color:var(--accent)}
+.msg{color:var(--muted);font-size:14px;min-height:1.3em}
+</style>
+</head>
+<body>
+<main>
+  <header class="row">
+    <img src="icon.svg" alt="" width="42" height="42" style="border-radius:10px">
+    <div class="grow"><h1>Estudio Procesal</h1><p class="sub">Derecho procesal colombiano, un poco cada día.</p></div>
+    <button id="installBtn" hidden>Instalar app</button>
+  </header>
+
+  <div class="card" id="updBox" hidden>
+    <div class="row"><p class="grow" id="updMsg"></p><button class="primary" id="updGo">Actualizar ahora</button></div>
+  </div>
+
+  <nav role="tablist" id="nav">
+    <button role="tab" data-tab="hoy" aria-selected="true">Hoy</button>
+    <button role="tab" data-tab="programa" aria-selected="false">Programa</button>
+    <button role="tab" data-tab="practica" aria-selected="false">Práctica</button>
+    <button role="tab" data-tab="repaso" aria-selected="false">Repaso</button>
+    <button role="tab" data-tab="novedades" aria-selected="false">Novedades</button>
+    <button role="tab" data-tab="progreso" aria-selected="false">Progreso</button>
+  </nav>
+
+  <!-- Vista de prueba en curso (reemplaza a las pestañas mientras dura) -->
+  <section class="card" id="quiz" hidden>
+    <div class="row"><span class="tag grow" id="qzTitle"></span><span class="sub" id="qzCount"></span><span class="sub" id="qzClock"></span></div>
+    <div class="prog"><i id="qzBar"></i></div>
+    <p class="tag" id="qzArea"></p>
+    <h2 id="qzQ" style="font-weight:600;line-height:1.4"></h2>
+    <div class="opts" id="qzOpts"></div>
+    <div class="fb" id="qzFb" hidden></div>
+    <div class="row">
+      <button class="primary" id="qzNext" hidden>Siguiente</button>
+      <button id="qzFlag" hidden>Marcar para verificar</button>
+      <span class="grow"></span>
+      <button id="qzQuit">Salir</button>
+    </div>
+  </section>
+  <section class="card" id="result" hidden>
+    <h2 id="rsTitle"></h2>
+    <div class="stats"><div class="stat"><small>Aciertos</small><b id="rsScore"></b></div><div class="stat"><small>Porcentaje</small><b id="rsPct"></b></div></div>
+    <p id="rsMsg"></p>
+    <div id="rsWrong" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="row"><button class="primary" id="rsBack">Volver</button><button id="rsRetry" hidden>Repetir las falladas</button></div>
+  </section>
+
+  <div id="tabs">
+  <section id="tab-hoy" style="display:flex;flex-direction:column;gap:16px">
+    <div class="card">
+      <div class="row"><h2 class="grow" id="hoyFecha"></h2><span id="hoyRacha" class="tag"></span></div>
+      <p class="sub" id="hoyPlan"></p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="tag grow">1 · Lección de hoy</span><span id="lecDone" class="done" hidden>✓ Leída</span></div>
+      <p class="tag" id="lecCurso"></p>
+      <p class="sub" id="lecArea"></p>
+      <h2 id="lecT"></h2>
+      <ul id="lecP"></ul>
+      <div class="row"><button class="primary" id="lecOk">Ya la estudié</button><button id="lecQuiz">Practicar este tema</button></div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="tag grow">2 · Prueba diaria</span><span id="dayDone" class="done" hidden></span></div>
+      <p id="dayInfo"></p>
+      <div class="row"><button class="primary" id="dayStart">Empezar la prueba de hoy</button></div>
+    </div>
+    <p class="sub">Material de estudio. Cada pregunta cita la norma: confirma siempre el texto vigente antes de usarlo en un caso real.</p>
+  </section>
+
+  <section id="tab-programa" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="card">
+      <h2>Programa de estudio</h2>
+      <p class="sub">Nueve cursos en el orden en que se enseñan en las facultades de derecho colombianas: primero la teoría general, luego el proceso civil y las pruebas, y después los procesales especializados. La lección diaria avanza por este orden.</p>
+      <p class="sub">El contenido está redactado a partir de las normas vigentes. Los libros aparecen como lectura para profundizar; confirma siempre la edición más reciente.</p>
+    </div>
+    <div id="pgmList" style="display:flex;flex-direction:column;gap:16px"></div>
+  </section>
+
+  <section class="card" id="tab-practica" hidden>
+    <h2>Práctica libre</h2>
+    <p class="sub">Elige las áreas. Sin marcar ninguna, se usan todas.</p>
+    <div class="chips" id="prAreas"></div>
+    <div class="row">
+      <label class="grow">Preguntas <select id="prN"><option>10</option><option>20</option><option>40</option></select></label>
+      <label class="grow">Modo <select id="prMode"><option value="study">Estudio: explicación tras cada respuesta</option><option value="exam">Simulacro: con tiempo y resultados al final</option></select></label>
+    </div>
+    <div class="row"><button class="primary" id="prStart">Empezar</button></div>
+    <p class="msg" id="prMsg"></p>
+  </section>
+
+  <section class="card" id="tab-repaso" hidden>
+    <h2>Repaso de lo que has fallado</h2>
+    <p class="sub" id="rpInfo"></p>
+    <div id="rpCard" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="tag" id="rpArea"></p>
+      <h2 id="rpQ" style="font-weight:600;line-height:1.4"></h2>
+      <div class="fb" id="rpA" hidden></div>
+      <div class="row">
+        <button class="primary" id="rpShow">Mostrar respuesta</button>
+        <button id="rpYes" hidden>La sabía</button><button id="rpNo" hidden>No la sabía</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-novedades" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="card"><h2>Reformas y novedades recientes</h2><p class="sub" id="nvVer"></p><div id="nvList" style="display:flex;flex-direction:column;gap:12px"></div></div>
+    <div class="card"><h2>Fuentes oficiales para revisar</h2><p class="sub">Dedica cinco minutos al día a una de ellas y anota abajo lo que encuentres.</p><ul id="nvSrc"></ul></div>
+    <div class="card">
+      <h2>Agregar lo que aprendí hoy</h2>
+      <p class="sub">Convierte una sentencia o una norma nueva en pregunta. Entrará en tus pruebas y repasos.</p>
+      <label>Área <select id="owA"></select></label>
+      <label>Pregunta <textarea id="owQ"></textarea></label>
+      <label>Respuesta correcta <input type="text" id="owC"></label>
+      <label>Opción incorrecta 1 <input type="text" id="ow1"></label>
+      <label>Opción incorrecta 2 <input type="text" id="ow2"></label>
+      <label>Opción incorrecta 3 <input type="text" id="ow3"></label>
+      <label>Norma o sentencia <input type="text" id="owN" placeholder="Ej.: Sentencia SU-000 de 2026"></label>
+      <label>Explicación breve <textarea id="owE"></textarea></label>
+      <div class="row"><button class="primary" id="owSave">Guardar pregunta</button></div>
+      <p class="msg" id="owMsg"></p>
+    </div>
+  </section>
+
+  <section id="tab-progreso" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="card">
+      <h2>Tu avance</h2>
+      <div class="stats">
+        <div class="stat"><small>Racha</small><b id="pgStreak">0</b></div>
+        <div class="stat"><small>Días de estudio</small><b id="pgDays">0</b></div>
+        <div class="stat"><small>Respondidas</small><b id="pgTotal">0</b></div>
+        <div class="stat"><small>Acierto</small><b id="pgAcc">—</b></div>
+      </div>
+      <h3>Últimas cuatro semanas</h3>
+      <div class="cal" id="pgCal"></div>
+    </div>
+    <div class="card"><h2>Dominio por área</h2><p class="sub">Una pregunta cuenta como dominada cuando la aciertas en repasos espaciados.</p><div id="pgAreas" style="display:flex;flex-direction:column;gap:12px"></div></div>
+    <div class="card"><h2>Preguntas marcadas para verificar</h2><p class="sub" id="pgFlagInfo"></p><ul id="pgFlags"></ul></div>
+    <div class="card">
+      <h2>Copia de seguridad</h2>
+      <p class="sub">Tu avance vive solo en este dispositivo. Copia este texto para llevarlo a otro, o pégalo aquí para restaurarlo.</p>
+      <textarea id="bkText" aria-label="Copia de seguridad"></textarea>
+      <div class="row"><button id="bkExport">Generar copia</button><button id="bkCopy">Copiar</button><button id="bkImport">Restaurar desde el texto</button></div>
+      <p class="msg" id="bkMsg"></p>
+    </div>
+  </section>
+  </div>
+</main>
+
+<script src="banco.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+// Contenido: el incluido en la app, o uno más nuevo ya descargado del canal de actualización.
+const REMOTE = 'https://wilson1987-goku.github.io/estudio-procesal/banco.json';
+const okBank = c => c && typeof c.version === 'string' && ['areas', 'preguntas', 'lecciones', 'programa', 'novedades', 'fuentes'].every(k => Array.isArray(c[k]) && c[k].length) &&
+  c.preguntas.every(q => q.id && q.q && Array.isArray(q.o) && q.o.length === 4 && q.a && q.e && q.n);
+let B = window.BANCO;
+try { const c = JSON.parse(localStorage.getItem('ep.banco') || 'null'); if (okBank(c) && c.version > B.version) B = c; } catch {}
+async function checkUpdate() {
+  try {
+    const r = await fetch(REMOTE + '?d=' + new Date().toISOString().slice(0, 10), { cache: 'no-store' });
+    if (!r.ok) return;
+    const c = await r.json();
+    if (!okBank(c) || c.version <= B.version) return;
+    localStorage.setItem('ep.banco', JSON.stringify(c));
+    document.getElementById('updMsg').textContent = `Hay contenido nuevo del ${c.version.split('-').reverse().join('/')}: ${c.preguntas.length} preguntas.`;
+    document.getElementById('updBox').hidden = false;
+  } catch {}
+}
+const AREA = Object.fromEntries(B.areas.map(a => [a.id, a.n]));
+const day = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const addDays = (n, from = new Date()) => { const d = new Date(from); d.setDate(d.getDate() + n); return day(d); };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
+
+/* ---------- Estado ---------- */
+const DEF = { cards: {}, days: {}, own: [], flags: [], read: [] };
+let S = DEF;
+try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('ep.state') || '{}')); } catch {}
+const save = () => { try { localStorage.setItem('ep.state', JSON.stringify(S)); } catch {} };
+const today = () => S.days[day()] ||= { n: 0, ok: 0 };
+const allQ = () => B.preguntas.concat(S.own);
+const INTERVALS = [1, 3, 7, 14, 30];   // días entre repasos, según la caja
+
+function grade(q, ok) {
+  const c = S.cards[q.id] ||= { box: 0, due: day(), n: 0, ok: 0 };
+  c.n++; if (ok) c.ok++;
+  c.box = ok ? Math.min(c.box + 1, 5) : 0;
+  c.due = ok ? addDays(INTERVALS[c.box - 1]) : addDays(1);
+  const t = today(); t.n++; if (ok) t.ok++;
+  save();
+}
+function streak() {
+  let n = 0; const d = new Date();
+  if (!S.days[day(d)]?.n) d.setDate(d.getDate() - 1);
+  while (S.days[day(d)]?.n) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+// Orden del programa: cada lección con el curso al que pertenece.
+const ORDER = [];
+B.programa.forEach((c, ci) => c.areas.forEach(a => B.lecciones.forEach((l, li) => { if (l.a === a) ORDER.push({ li, ci }); })));
+const courseOf = area => B.programa.findIndex(c => c.areas.includes(area));
+// La lección del día es la siguiente sin leer del programa; queda fija durante el día.
+function lessonIdx() {
+  const t = today();
+  if (t.li == null) {
+    const nxt = ORDER.find(o => !S.read.includes(o.li));
+    t.li = nxt ? nxt.li : ORDER[Math.floor(new Date(day() + 'T12:00:00').getTime() / 864e5) % ORDER.length].li;
+    save();
+  }
+  return t.li;
+}
+const lessonOfDay = () => B.lecciones[lessonIdx()];
+
+/* ---------- Selección de preguntas ---------- */
+function dailySet() {
+  const qs = allQ(), t = day(), les = lessonOfDay();
+  const due = qs.filter(q => S.cards[q.id] && S.cards[q.id].due <= t).sort((a, b) => S.cards[a.id].box - S.cards[b.id].box).slice(0, 6);
+  const fresh = shuffle(qs.filter(q => !S.cards[q.id]));
+  const pick = [...due, ...fresh.filter(q => q.a === les.a).slice(0, 3)];
+  for (const q of fresh) { if (pick.length >= 10) break; if (!pick.includes(q)) pick.push(q); }
+  for (const q of shuffle(qs)) { if (pick.length >= 10) break; if (!pick.includes(q)) pick.push(q); }
+  return shuffle(pick.slice(0, 10));
+}
+
+/* ---------- Motor de pruebas ---------- */
+let Z = null;
+function startQuiz(list, opts) {
+  if (!list.length) return false;
+  Z = { list, i: 0, res: [], mode: opts.mode || 'study', title: opts.title, daily: !!opts.daily, t0: Date.now(), limit: opts.mode === 'exam' ? list.length * 90 : 0 };
+  $('tabs').hidden = $('nav').hidden = true; $('result').hidden = true; $('quiz').hidden = false;
+  clearInterval(startQuiz.iv);
+  if (Z.limit) startQuiz.iv = setInterval(() => {
+    const left = Z.limit - Math.floor((Date.now() - Z.t0) / 1000);
+    $('qzClock').textContent = '⏱ ' + Math.max(0, Math.floor(left / 60)) + ':' + String(Math.max(0, left % 60)).padStart(2, '0');
+    if (left <= 0) finishQuiz();
+  }, 500);
+  $('qzClock').textContent = '';
+  showQ(); window.scrollTo(0, 0); return true;
+}
+function showQ() {
+  const q = Z.list[Z.i];
+  $('qzTitle').textContent = Z.title; $('qzCount').textContent = (Z.i + 1) + ' de ' + Z.list.length;
+  $('qzBar').style.width = (100 * Z.i / Z.list.length) + '%';
+  $('qzArea').textContent = AREA[q.a] || 'Mis preguntas'; $('qzQ').textContent = q.q;
+  $('qzFb').hidden = $('qzNext').hidden = $('qzFlag').hidden = true;
+  const box = $('qzOpts'); box.innerHTML = '';
+  for (const o of shuffle(q.o)) { const b = el('button', o); b.onclick = () => answer(o, b); box.appendChild(b); }
+}
+function answer(o, btn) {
+  const q = Z.list[Z.i], ok = o === q.o[0];
+  Z.res.push({ q, ok, picked: o }); grade(q, ok);
+  if (Z.mode === 'exam') return next();
+  for (const b of $('qzOpts').children) { b.disabled = true; if (b.textContent === q.o[0]) b.classList.add('ok'); }
+  if (!ok) btn.classList.add('no');
+  const fb = $('qzFb'); fb.innerHTML = ''; fb.hidden = false;
+  fb.append(el('b', ok ? '✓ Correcto' : '✗ Incorrecto', ok ? 'ok' : 'no'), el('p', q.e), el('p', q.n, 'norma'));
+  $('qzNext').hidden = $('qzFlag').hidden = false;
+  $('qzNext').textContent = Z.i + 1 < Z.list.length ? 'Siguiente' : 'Ver resultado';
+  $('qzFlag').textContent = S.flags.includes(q.id) ? 'Marcada para verificar ✓' : 'Marcar para verificar';
+  $('qzNext').focus();
+}
+function next() { Z.i++; if (Z.i >= Z.list.length) finishQuiz(); else { showQ(); window.scrollTo(0, 0); } }
+function finishQuiz() {
+  clearInterval(startQuiz.iv);
+  const ok = Z.res.filter(r => r.ok).length, n = Z.list.length, pct = Math.round(100 * ok / n);
+  if (Z.daily && Z.res.length === n) { today().daily = pct; save(); }
+  $('quiz').hidden = true; $('result').hidden = false;
+  $('rsTitle').textContent = Z.title + ': resultado';
+  $('rsScore').textContent = ok + ' / ' + n; $('rsPct').textContent = pct + '%';
+  $('rsMsg').textContent = Z.res.length < n ? 'Se acabó el tiempo: las preguntas sin responder cuentan como falladas.' :
+    pct >= 80 ? 'Muy bien. Mañana vuelven solo las que necesiten repaso.' : pct >= 60 ? 'Vas bien. Las falladas volverán mañana para fijarlas.' : 'Hoy costó. Lee las explicaciones de abajo y repite las falladas.';
+  const wrong = Z.res.filter(r => !r.ok), box = $('rsWrong'); box.innerHTML = '';
+  for (const r of wrong) {
+    const d = el('div', null, 'fb');
+    d.append(el('b', r.q.q), el('p', 'Tu respuesta: ' + r.picked), el('p', 'Correcta: ' + r.q.o[0]), el('p', r.q.e), el('p', r.q.n, 'norma'));
+    box.appendChild(d);
+  }
+  $('rsRetry').hidden = !wrong.length;
+  $('rsRetry').onclick = () => startQuiz(wrong.map(r => r.q), { title: 'Repetición', mode: 'study' });
+  window.scrollTo(0, 0);
+}
+function closeQuiz() { clearInterval(startQuiz.iv); Z = null; $('quiz').hidden = $('result').hidden = true; $('tabs').hidden = $('nav').hidden = false; render(); }
+$('qzNext').onclick = next;
+$('qzQuit').onclick = () => { if (Z.res.length) finishQuiz(); else closeQuiz(); };
+$('rsBack').onclick = closeQuiz;
+$('qzFlag').onclick = () => {
+  const id = Z.list[Z.i].id, k = S.flags.indexOf(id);
+  if (k < 0) S.flags.push(id); else S.flags.splice(k, 1);
+  save(); $('qzFlag').textContent = k < 0 ? 'Marcada para verificar ✓' : 'Marcar para verificar';
+};
+
+/* ---------- Repaso con tarjetas ---------- */
+let RP = [];
+function repasoList() { const t = day(); return allQ().filter(q => S.cards[q.id] && (S.cards[q.id].box <= 1 || S.cards[q.id].due <= t) && S.cards[q.id].n > S.cards[q.id].ok); }
+function showRepaso() {
+  if (!RP.length) RP = shuffle(repasoList());
+  const q = RP[0];
+  $('rpCard').hidden = !q;
+  $('rpInfo').textContent = q ? RP.length + ' por repasar. Piensa la respuesta antes de mostrarla.' : 'No tienes preguntas falladas pendientes. Vuelven aquí las que falles en las pruebas.';
+  if (!q) return;
+  $('rpArea').textContent = AREA[q.a] || 'Mis preguntas'; $('rpQ').textContent = q.q;
+  $('rpA').hidden = $('rpYes').hidden = $('rpNo').hidden = true; $('rpShow').hidden = false;
+}
+$('rpShow').onclick = () => {
+  const q = RP[0], a = $('rpA'); a.innerHTML = ''; a.hidden = false;
+  a.append(el('b', q.o[0], 'ok'), el('p', q.e), el('p', q.n, 'norma'));
+  $('rpShow').hidden = true; $('rpYes').hidden = $('rpNo').hidden = false;
+};
+const rpGrade = ok => { grade(RP.shift(), ok); showRepaso(); };
+$('rpYes').onclick = () => rpGrade(true); $('rpNo').onclick = () => rpGrade(false);
+
+/* ---------- Render ---------- */
+function render() {
+  const t = today(), les = lessonOfDay(), st = streak();
+  $('hoyFecha').textContent = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, c => c.toUpperCase());
+  $('hoyRacha').textContent = st ? st + (st === 1 ? ' día seguido' : ' días seguidos') : '';
+  const pend = [!t.lesson && 'la lección', t.daily == null && 'la prueba diaria'].filter(Boolean);
+  $('hoyPlan').textContent = pend.length ? 'Te falta hoy: ' + pend.join(' y ') + '. Son unos quince minutos.' : 'Cumpliste el estudio de hoy. Puedes seguir en Práctica o Repaso.';
+  const ci = courseOf(les.a);
+  $('lecCurso').textContent = `Curso ${ci + 1} de ${B.programa.length} · ${B.programa[ci].t}`;
+  $('lecArea').textContent = AREA[les.a] + ` · lección ${ORDER.findIndex(o => o.li === lessonIdx()) + 1} de ${ORDER.length}`; $('lecT').textContent = les.t;
+  $('lecP').innerHTML = ''; for (const p of les.p) $('lecP').appendChild(el('li', p));
+  $('lecDone').hidden = !t.lesson; $('lecOk').hidden = !!t.lesson;
+  const due = allQ().filter(q => S.cards[q.id] && S.cards[q.id].due <= day()).length, fresh = allQ().filter(q => !S.cards[q.id]).length;
+  $('dayDone').hidden = t.daily == null; $('dayDone').textContent = t.daily != null ? '✓ Hecha: ' + t.daily + '%' : '';
+  $('dayInfo').textContent = `Diez preguntas: primero los repasos que vencen hoy (${due}) y luego preguntas nuevas (quedan ${fresh} sin ver).`;
+  $('dayStart').textContent = t.daily == null ? 'Empezar la prueba de hoy' : 'Hacer otra ronda';
+  // Progreso
+  const ds = Object.entries(S.days).filter(([, v]) => v.n), tot = ds.reduce((s, [, v]) => s + v.n, 0), okk = ds.reduce((s, [, v]) => s + v.ok, 0);
+  $('pgStreak').textContent = st; $('pgDays').textContent = ds.length; $('pgTotal').textContent = tot; $('pgAcc').textContent = tot ? Math.round(100 * okk / tot) + '%' : '—';
+  const cal = $('pgCal'); cal.innerHTML = '';
+  for (let i = 27; i >= 0; i--) { const d = addDays(-i), c = el('i'); if (S.days[d]?.n) c.classList.add('on'); if (!i) c.classList.add('today'); c.title = d; cal.appendChild(c); }
+  const pa = $('pgAreas'); pa.innerHTML = '';
+  for (const a of B.areas) {
+    const qs = allQ().filter(q => q.a === a.id), dom = qs.filter(q => (S.cards[q.id]?.box || 0) >= 3).length, seen = qs.filter(q => S.cards[q.id]).length;
+    const r = el('div', null, 'arearow'), bar = el('div', null, 'bar'), f = el('i'); f.style.width = (qs.length ? 100 * dom / qs.length : 0) + '%'; bar.appendChild(f);
+    r.append(el('span', a.n), el('span', `${dom} de ${qs.length} dominadas · ${seen} vistas`, 'sub'), bar); pa.appendChild(r);
+  }
+  // Programa
+  const pl = $('pgmList'); pl.innerHTML = '';
+  B.programa.forEach((c, ci) => {
+    const qs = allQ().filter(q => c.areas.includes(q.a)), dom = qs.filter(q => (S.cards[q.id]?.box || 0) >= 3).length;
+    const les = ORDER.filter(o => o.ci === ci), leidas = les.filter(o => S.read.includes(o.li)).length;
+    const card = el('div', null, 'card'), bar = el('div', null, 'bar'), f = el('i'); f.style.width = (qs.length ? 100 * dom / qs.length : 0) + '%'; bar.appendChild(f);
+    card.append(el('span', 'Curso ' + (ci + 1), 'tag'), el('h2', c.t), el('p', c.d, 'sub'), bar,
+      el('p', `${leidas} de ${les.length} lecciones leídas · ${dom} de ${qs.length} preguntas dominadas`, 'sub'));
+    for (const o of les) {
+      const l = B.lecciones[o.li], det = el('details'), sum = el('summary', (S.read.includes(o.li) ? '✓ ' : '') + l.t), ul = el('ul');
+      sum.style.cssText = 'cursor:pointer;font-weight:600'; ul.style.marginTop = '8px';
+      for (const p of l.p) ul.appendChild(el('li', p));
+      det.append(sum, ul); card.appendChild(det);
+    }
+    const lt = el('p', 'Para profundizar: ' + c.lect.join('; ') + '.', 'sub'), b = el('button', 'Practicar este curso', 'primary');
+    b.onclick = () => startQuiz(shuffle(qs).slice(0, 10), { title: c.t, mode: 'study' });
+    const row = el('div', null, 'row'); row.appendChild(b); card.append(lt, row); pl.appendChild(card);
+  });
+  const fl = $('pgFlags'); fl.innerHTML = '';
+  $('pgFlagInfo').textContent = S.flags.length ? 'Confírmalas contra la norma o pídele a quien mantiene el banco que las revise.' : 'Ninguna. Si una respuesta te genera duda, márcala durante la prueba.';
+  for (const id of S.flags) { const q = allQ().find(x => x.id === id); if (q) fl.appendChild(el('li', q.q + ' (' + q.n + ')')); }
+  $('nvVer').textContent = `Banco actualizado el ${B.version.split('-').reverse().join('/')}: ${B.preguntas.length} preguntas y ${B.lecciones.length} lecciones` + (S.own.length ? `, más ${S.own.length} tuyas.` : '.');
+}
+function renderStatic() {
+  const pr = $('prAreas'); for (const a of B.areas) { const l = el('label'), i = el('input'); i.type = 'checkbox'; i.value = a.id; l.append(i, a.n); pr.appendChild(l); $('owA').add(new Option(a.n, a.id)); }
+  const nv = $('nvList');
+  for (const n of B.novedades) {
+    const d = el('div', null, 'nov'), a = el('a', 'Ver la fuente'); a.href = n.u; a.target = '_blank'; a.rel = 'noopener';
+    const b = el('button', 'Practicar esta área'); b.onclick = () => startQuiz(shuffle(allQ().filter(q => q.a === n.a)).slice(0, 10), { title: AREA[n.a], mode: 'study' });
+    const row = el('div', null, 'row'); row.append(a, b);
+    d.append(el('span', n.f.split('-').reverse().join('/') + ' · ' + AREA[n.a], 'tag'), el('h3', n.t), el('p', n.d), row); nv.appendChild(d);
+  }
+  for (const f of B.fuentes) { const li = el('li'), a = el('a', f.t); a.href = f.u; a.target = '_blank'; a.rel = 'noopener'; li.appendChild(a); $('nvSrc').appendChild(li); }
+}
+
+/* ---------- Eventos ---------- */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(o => o.setAttribute('aria-selected', o === b));
+  for (const t of ['hoy', 'programa', 'practica', 'repaso', 'novedades', 'progreso']) $('tab-' + t).hidden = t !== b.dataset.tab;
+  if (b.dataset.tab === 'repaso') { RP = []; showRepaso(); }
+  render();
+});
+$('lecOk').onclick = () => { today().lesson = true; if (!S.read.includes(lessonIdx())) S.read.push(lessonIdx()); save(); render(); };
+$('lecQuiz').onclick = () => { const a = lessonOfDay().a; startQuiz(shuffle(allQ().filter(q => q.a === a)).slice(0, 8), { title: AREA[a], mode: 'study' }); };
+$('dayStart').onclick = () => startQuiz(dailySet(), { title: 'Prueba diaria', mode: 'study', daily: today().daily == null });
+$('prStart').onclick = () => {
+  const sel = [...document.querySelectorAll('#prAreas input:checked')].map(i => i.value);
+  const pool = allQ().filter(q => !sel.length || sel.includes(q.a)), mode = $('prMode').value;
+  if (!startQuiz(shuffle(pool).slice(0, +$('prN').value), { title: mode === 'exam' ? 'Simulacro' : 'Práctica', mode })) $('prMsg').textContent = 'No hay preguntas en esas áreas.';
+};
+$('owSave').onclick = () => {
+  const v = id => $(id).value.trim(), o = [v('owC'), v('ow1'), v('ow2'), v('ow3')];
+  if (!v('owQ') || o.some(x => !x) || new Set(o).size < 4) return $('owMsg').textContent = 'Completa la pregunta y cuatro opciones distintas.';
+  S.own.push({ id: 'own' + Date.now(), a: $('owA').value, q: v('owQ'), o, e: v('owE') || 'Sin explicación.', n: v('owN') || 'Sin fuente anotada' });
+  save(); for (const id of ['owQ', 'owC', 'ow1', 'ow2', 'ow3', 'owN', 'owE']) $(id).value = '';
+  $('owMsg').textContent = 'Guardada. Aparecerá en tus próximas pruebas.'; render();
+};
+$('bkExport').onclick = () => { $('bkText').value = JSON.stringify(S); $('bkMsg').textContent = 'Copia generada. Guárdala en un lugar seguro.'; };
+$('bkCopy').onclick = async () => { try { await navigator.clipboard.writeText($('bkText').value); $('bkMsg').textContent = 'Copiado.'; } catch { $('bkText').select(); $('bkMsg').textContent = 'Selecciona el texto y cópialo manualmente.'; } };
+$('bkImport').onclick = () => {
+  try { const x = JSON.parse($('bkText').value); if (!x.cards || !x.days) throw 0; S = Object.assign({}, DEF, x); save(); render(); $('bkMsg').textContent = 'Avance restaurado.'; }
+  catch { $('bkMsg').textContent = 'Ese texto no es una copia válida.'; }
+};
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').hidden = false; });
+$('installBtn').onclick = () => { if (installEvt) { installEvt.prompt(); installEvt = null; $('installBtn').hidden = true; } };
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+$('updGo').onclick = () => location.reload();
+renderStatic(); render(); checkUpdate();
+</script>
+</body>
+</html>
