@@ -48,6 +48,12 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .opts button.no{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}
 .fb{background:var(--raise);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
 .fb b.ok{color:var(--good)} .fb b.no{color:var(--bad)}
+.lec{display:flex;flex-direction:column;gap:14px}
+.lec h3{font-size:15px;margin:0 0 3px}
+.lec p{line-height:1.6}
+.nota{border-radius:8px;padding:12px 14px;background:var(--raise);display:flex;flex-direction:column;gap:4px}
+.nota b{font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.nota.caso b{color:var(--accent)} .nota.ojo b{color:var(--warm)}
 .norma{font-size:13px;color:var(--muted);font-weight:600}
 .bar{height:8px;background:var(--raise);border-radius:4px;overflow:hidden} .bar i{display:block;height:100%;background:var(--accent)}
 .prog{height:5px;background:var(--raise);border-radius:3px;overflow:hidden} .prog i{display:block;height:100%;background:var(--accent);transition:width .2s}
@@ -122,7 +128,8 @@ a{color:var(--accent)}
       <p class="tag" id="lecCurso"></p>
       <p class="sub" id="lecArea"></p>
       <h2 id="lecT"></h2>
-      <ul id="lecP"></ul>
+      <p class="sub" id="lecLen"></p>
+      <div class="lec" id="lecP"></div>
       <div class="row"><button class="primary" id="lecOk">Ya la estudié</button><button id="lecQuiz">Practicar este tema</button></div>
     </div>
     <div class="card">
@@ -229,7 +236,7 @@ async function checkUpdate() {
     const c = await r.json();
     if (!okBank(c) || c.version <= B.version) return;
     localStorage.setItem('ep.banco', JSON.stringify(c));
-    document.getElementById('updMsg').textContent = `Hay contenido nuevo del ${c.version.split('-').reverse().join('/')}: ${c.preguntas.length} preguntas.`;
+    document.getElementById('updMsg').textContent = `Hay contenido nuevo del ${c.version.slice(0, 10).split('-').reverse().join('/')}: lecciones y preguntas actualizadas.`;
     document.getElementById('updBox').hidden = false;
   } catch {}
 }
@@ -277,6 +284,21 @@ function lessonIdx() {
   return t.li;
 }
 const lessonOfDay = () => B.lecciones[lessonIdx()];
+
+// Pinta una lección: cada punto es "Título: explicación"; luego el caso práctico y el error frecuente.
+function fillLesson(box, les) {
+  box.innerHTML = '';
+  les.p.forEach((txt, i) => {
+    const k = txt.indexOf(': '), d = el('div');
+    if (k > 0 && k <= 70) d.append(el('h3', (i + 1) + '. ' + txt.slice(0, k)), el('p', txt.slice(k + 2)));
+    else d.append(el('p', txt));
+    box.appendChild(d);
+  });
+  if (les.ej) { const n = el('div', null, 'nota caso'); n.append(el('b', 'Caso práctico'), el('p', les.ej)); box.appendChild(n); }
+  if (les.ojo) { const n = el('div', null, 'nota ojo'); n.append(el('b', 'Error frecuente'), el('p', les.ojo)); box.appendChild(n); }
+}
+const lessonMinutes = les => Math.max(1, Math.round([...les.p, les.ej || '', les.ojo || ''].join(' ').split(/\s+/).length / 180));
+const verDate = v => v.slice(0, 10).split('-').reverse().join('/');
 
 /* ---------- Selección de preguntas ---------- */
 function dailySet() {
@@ -382,11 +404,12 @@ function render() {
   $('hoyFecha').textContent = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, c => c.toUpperCase());
   $('hoyRacha').textContent = st ? st + (st === 1 ? ' día seguido' : ' días seguidos') : '';
   const pend = [!t.lesson && 'la lección', t.daily == null && 'la prueba diaria'].filter(Boolean);
-  $('hoyPlan').textContent = pend.length ? 'Te falta hoy: ' + pend.join(' y ') + '. Son unos quince minutos.' : 'Cumpliste el estudio de hoy. Puedes seguir en Práctica o Repaso.';
+  $('hoyPlan').textContent = pend.length ? 'Te falta hoy: ' + pend.join(' y ') + '.' : 'Cumpliste el estudio de hoy. Puedes seguir en Práctica o Repaso.';
   const ci = courseOf(les.a);
   $('lecCurso').textContent = `Curso ${ci + 1} de ${B.programa.length} · ${B.programa[ci].t}`;
   $('lecArea').textContent = AREA[les.a] + ` · lección ${ORDER.findIndex(o => o.li === lessonIdx()) + 1} de ${ORDER.length}`; $('lecT').textContent = les.t;
-  $('lecP').innerHTML = ''; for (const p of les.p) $('lecP').appendChild(el('li', p));
+  fillLesson($('lecP'), les);
+  $('lecLen').textContent = `${les.p.length} puntos · lectura de unos ${lessonMinutes(les)} minutos`;
   $('lecDone').hidden = !t.lesson; $('lecOk').hidden = !!t.lesson;
   const due = allQ().filter(q => S.cards[q.id] && S.cards[q.id].due <= day()).length, fresh = allQ().filter(q => !S.cards[q.id]).length;
   $('dayDone').hidden = t.daily == null; $('dayDone').textContent = t.daily != null ? '✓ Hecha: ' + t.daily + '%' : '';
@@ -412,10 +435,10 @@ function render() {
     card.append(el('span', 'Curso ' + (ci + 1), 'tag'), el('h2', c.t), el('p', c.d, 'sub'), bar,
       el('p', `${leidas} de ${les.length} lecciones leídas · ${dom} de ${qs.length} preguntas dominadas`, 'sub'));
     for (const o of les) {
-      const l = B.lecciones[o.li], det = el('details'), sum = el('summary', (S.read.includes(o.li) ? '✓ ' : '') + l.t), ul = el('ul');
-      sum.style.cssText = 'cursor:pointer;font-weight:600'; ul.style.marginTop = '8px';
-      for (const p of l.p) ul.appendChild(el('li', p));
-      det.append(sum, ul); card.appendChild(det);
+      const l = B.lecciones[o.li], det = el('details'), sum = el('summary', (S.read.includes(o.li) ? '✓ ' : '') + l.t), body = el('div', null, 'lec');
+      sum.style.cssText = 'cursor:pointer;font-weight:600'; body.style.marginTop = '10px';
+      fillLesson(body, l);
+      det.append(sum, body); card.appendChild(det);
     }
     const lt = el('p', 'Para profundizar: ' + c.lect.join('; ') + '.', 'sub'), b = el('button', 'Practicar este curso', 'primary');
     b.onclick = () => startQuiz(shuffle(qs).slice(0, 10), { title: c.t, mode: 'study' });
@@ -424,7 +447,7 @@ function render() {
   const fl = $('pgFlags'); fl.innerHTML = '';
   $('pgFlagInfo').textContent = S.flags.length ? 'Confírmalas contra la norma o pídele a quien mantiene el banco que las revise.' : 'Ninguna. Si una respuesta te genera duda, márcala durante la prueba.';
   for (const id of S.flags) { const q = allQ().find(x => x.id === id); if (q) fl.appendChild(el('li', q.q + ' (' + q.n + ')')); }
-  $('nvVer').textContent = `Banco actualizado el ${B.version.split('-').reverse().join('/')}: ${B.preguntas.length} preguntas y ${B.lecciones.length} lecciones` + (S.own.length ? `, más ${S.own.length} tuyas.` : '.');
+  $('nvVer').textContent = `Banco actualizado el ${verDate(B.version)}: ${B.preguntas.length} preguntas y ${B.lecciones.length} lecciones` + (S.own.length ? `, más ${S.own.length} tuyas.` : '.');
 }
 function renderStatic() {
   const pr = $('prAreas'); for (const a of B.areas) { const l = el('label'), i = el('input'); i.type = 'checkbox'; i.value = a.id; l.append(i, a.n); pr.appendChild(l); $('owA').add(new Option(a.n, a.id)); }

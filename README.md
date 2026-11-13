@@ -15,3 +15,10 @@ App de estudio diario de derecho procesal colombiano: lección del día, prueba 
 - Cada pregunta lleva cuatro opciones distintas, una explicación breve y la norma o sentencia que la sustenta.
 - Al cambiar el contenido hay que subir la fecha de `version` (formato AAAA-MM-DD) o la app no lo tomará como nuevo.
 - El contenido se redacta a partir de las normas y decisiones oficiales, con palabras propias.
+
+## Formato de las lecciones
+
+- Cada lección tiene `a` (área), `t` (título), `p` (puntos), `ej` (caso práctico) y `ojo` (error frecuente).
+- Cada elemento de `p` es un texto que empieza con un título corto, seguido de dos puntos y de la explicación completa: `"Título del punto: explicación desarrollada, con la norma citada al final (CGP, art. 000)."`
+- Las lecciones son explicaciones extensas, punto por punto, no resúmenes: cada punto desarrolla la regla, su alcance y su consecuencia práctica.
+- `p` debe contener solo textos (no objetos), porque las versiones ya instaladas de la app los muestran tal cual.
