@@ -2,7 +2,17 @@
 
 App de estudio diario de derecho procesal colombiano: lección del día, prueba diaria con repaso espaciado, programa por cursos y novedades normativas.
 
+## Usar la app
+
+- **En el navegador o en iPhone:** https://wilson1987-goku.github.io/estudio-procesal/
+- **Instalador para Android:** https://wilson1987-goku.github.io/estudio-procesal/EstudioProcesal.apk
+
+Al abrir el instalador, Android pide permiso para instalar apps de origen desconocido. La app instalada recibe el contenido nuevo sola, sin reinstalar.
+
 ## Archivos
+
+- `EstudioProcesal.apk`: instalador de Android, siempre en su versión más reciente.
+- `android/`: código de la app Android. El archivo de firma no se publica.
 
 - `index.html`: la aplicación.
 - `banco.js`: el contenido (áreas, preguntas, lecciones, programa, novedades y fuentes). Es el archivo que se edita.

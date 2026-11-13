@@ -1,0 +1,8 @@
+# Archivos generados por build.sh
+build/
+assets/
+res/mipmap-xxxhdpi/
+
+# La firma nunca se publica
+*.jks
+*.keystore

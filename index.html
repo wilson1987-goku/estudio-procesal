@@ -78,6 +78,7 @@ a{color:var(--accent)}
   <header class="row">
     <img src="icon.svg" alt="" width="42" height="42" style="border-radius:10px">
     <div class="grow"><h1>Estudio Procesal</h1><p class="sub">Derecho procesal colombiano, un poco cada día.</p></div>
+    <a class="btn" id="apkLink" href="EstudioProcesal.apk" download hidden>Descargar para Android</a>
     <button id="installBtn" hidden>Instalar app</button>
   </header>
 
@@ -496,6 +497,8 @@ $('bkImport').onclick = () => {
 let installEvt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').hidden = false; });
 $('installBtn').onclick = () => { if (installEvt) { installEvt.prompt(); installEvt = null; $('installBtn').hidden = true; } };
+// El instalador de Android se ofrece en la versión web, no dentro de la app ya instalada.
+$('apkLink').hidden = location.hostname === 'estudio.local' || location.protocol === 'file:';
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 $('updGo').onclick = () => location.reload();
 renderStatic(); render(); checkUpdate();
