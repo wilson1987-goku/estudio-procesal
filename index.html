@@ -271,7 +271,11 @@ function streak() {
 }
 // Orden del programa: cada lección con el curso al que pertenece.
 const ORDER = [];
-B.programa.forEach((c, ci) => c.areas.forEach(a => B.lecciones.forEach((l, li) => { if (l.a === a) ORDER.push({ li, ci }); })));
+// Dentro de cada área, primero las lecciones con orden académico explícito (campo o) y luego las demás.
+B.programa.forEach((c, ci) => c.areas.forEach(a => {
+  const key = li => B.lecciones[li].o ?? 100 + li;
+  B.lecciones.map((l, li) => li).filter(li => B.lecciones[li].a === a).sort((x, y) => key(x) - key(y)).forEach(li => ORDER.push({ li, ci }));
+}));
 const courseOf = area => B.programa.findIndex(c => c.areas.includes(area));
 // La lección del día es la siguiente sin leer del programa; queda fija durante el día.
 function lessonIdx() {
