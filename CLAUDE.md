@@ -23,4 +23,5 @@ Todo cambio se publica en GitHub en el mismo momento, y el instalador de Android
 - `banco.js` es la fuente; `banco.json` se genera con `node actualizar.js` y es lo que la app instalada descarga para actualizarse.
 - Formato y reglas del banco y de las lecciones: ver `README.md`.
 - Las lecciones son explicaciones extensas, punto por punto, redactadas con palabras propias a partir de las normas. Los libros se citan solo como lectura para profundizar; no se copia su texto.
+- Primero se explica y después se pregunta: toda pregunta lleva `l` (índice de la lección que explica su respuesta) y esa lección debe contener el dato. El validador exige `l` y al menos dos preguntas por lección.
 - Las lecciones nuevas se agregan al final del arreglo (los índices guardan el avance del usuario) y su posición en el programa se define con el campo `o`.

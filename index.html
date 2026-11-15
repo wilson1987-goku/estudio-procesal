@@ -60,6 +60,9 @@ label{font-weight:600;font-size:14.5px;display:flex;flex-direction:column;gap:5p
 .pill.done{border-color:var(--good);background:var(--soft);background:color-mix(in srgb,var(--good) 13%,var(--paper))}
 .pill.done::before{content:"";width:9px;height:5px;border-left:2px solid var(--good);border-bottom:2px solid var(--good);transform:rotate(-45deg) translateY(-1px)}
 .msg{color:var(--muted);font-size:14.5px;min-height:1.3em}
+.stepbox{display:flex;flex-direction:column;gap:14px}
+label.check{flex-direction:row;align-items:center;gap:9px;font-weight:500}
+label.check input{width:18px;height:18px;accent-color:var(--accent)}
 
 /* Cabecera */
 .top{display:flex;gap:12px;align-items:center}
@@ -206,14 +209,23 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
         <p class="sub" id="lecArea"></p>
       </div>
       <div class="row"><span class="pill" id="lecLen"></span><span id="lecDone" class="pill done" hidden>Leída</span></div>
-      <div class="lec" id="lecP"></div>
-      <div class="row"><button class="primary" id="lecOk">Ya la estudié</button><button id="lecQuiz">Practicar este tema</button></div>
+      <!-- Lectura guiada: un punto a la vez -->
+      <div id="lecStep" class="stepbox">
+        <div class="segs" id="lecSegs"></div>
+        <p class="tag" id="lecStepN"></p>
+        <div class="lec" id="lecOne"></div>
+        <div class="row"><button id="lecPrev">Anterior</button><button class="primary" id="lecNext">Siguiente punto</button><span class="grow"></span><button id="lecAll">Ver toda la lección</button></div>
+      </div>
+      <div id="lecFull" class="stepbox" hidden>
+        <div class="lec" id="lecP"></div>
+        <div class="row"><button class="primary" id="lecOk">Ya la estudié: comprobar lo aprendido</button><button id="lecQuiz">Comprobar esta lección</button><button id="lecGuide">Volver al paso a paso</button></div>
+      </div>
     </div>
 
     <div class="card" style="--c:var(--accent)">
       <div class="band">
         <span class="tag">Prueba diaria</span>
-        <h2>Diez preguntas para fijar lo aprendido</h2>
+        <h2>Preguntas solo de lo que ya estudiaste</h2>
       </div>
       <p id="dayInfo"></p>
       <div class="row"><button class="primary" id="dayStart">Empezar la prueba de hoy</button><span id="dayDone" class="pill done" hidden></span></div>
@@ -232,8 +244,9 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
 
   <section class="card" id="tab-practica" hidden style="--c:var(--accent)">
     <div class="band"><span class="tag">Práctica libre</span><h2>Arma tu propia ronda</h2></div>
-    <p class="sub">Elige las áreas. Sin marcar ninguna, se usan todas.</p>
+    <p class="sub">Elige las áreas. Sin marcar ninguna, se usan todas. Solo entran preguntas de lecciones que ya estudiaste.</p>
     <div class="chips" id="prAreas"></div>
+    <label class="check"><input type="checkbox" id="prAll"> Incluir también temas que aún no he estudiado</label>
     <div class="row">
       <label class="grow">Preguntas <select id="prN"><option>10</option><option>20</option><option>40</option></select></label>
       <label class="grow">Modo <select id="prMode"><option value="study">Estudio: explicación tras cada respuesta</option><option value="exam">Simulacro: con tiempo y resultados al final</option></select></label>
@@ -347,6 +360,11 @@ const save = () => { try { localStorage.setItem('ep.state', JSON.stringify(S)); 
 const today = () => S.days[day()] ||= { n: 0, ok: 0 };
 const allQ = () => B.preguntas.concat(S.own);
 const INTERVALS = [1, 3, 7, 14, 30];   // días entre repasos, según la caja
+// La app solo pregunta lo que ya explicó: una pregunta queda disponible cuando su lección (campo l) está leída.
+// Las preguntas creadas por el usuario no tienen lección y siempre están disponibles.
+const unlocked = q => q.l == null || S.read.includes(q.l);
+const poolQ = () => allQ().filter(unlocked);
+const lessonQs = li => B.preguntas.filter(q => q.l === li);
 
 function grade(q, ok) {
   const c = S.cards[q.id] ||= { box: 0, due: day(), n: 0, ok: 0 };
@@ -385,26 +403,47 @@ function lessonIdx() {
 const lessonOfDay = () => B.lecciones[lessonIdx()];
 
 // Pinta una lección: cada punto es "Título: explicación"; luego el caso práctico y el error frecuente.
-function fillLesson(box, les) {
-  box.innerHTML = '';
-  les.p.forEach((txt, i) => {
+function lessonNodes(les) {
+  const out = les.p.map((txt, i) => {
     const k = txt.indexOf(': '), d = el('div', null, 'pt'), body = el('div');
     if (k > 0 && k <= 70) body.append(el('h3', txt.slice(0, k)), el('p', txt.slice(k + 2)));
     else body.append(el('p', txt));
-    d.append(el('span', String(i + 1), 'num'), body); box.appendChild(d);
+    d.append(el('span', String(i + 1), 'num'), body); return d;
   });
-  if (les.ej) { const n = el('div', null, 'nota caso'); n.append(el('b', 'Caso práctico'), el('p', les.ej)); box.appendChild(n); }
-  if (les.ojo) { const n = el('div', null, 'nota ojo'); n.append(el('b', 'Error frecuente'), el('p', les.ojo)); box.appendChild(n); }
+  if (les.ej) { const n = el('div', null, 'nota caso'); n.append(el('b', 'Caso práctico'), el('p', les.ej)); out.push(n); }
+  if (les.ojo) { const n = el('div', null, 'nota ojo'); n.append(el('b', 'Error frecuente'), el('p', les.ojo)); out.push(n); }
+  return out;
+}
+function fillLesson(box, les) { box.replaceChildren(...lessonNodes(les)); }
+// Lectura guiada de la lección del día: muestra un punto a la vez.
+let showAll = false;
+function paintStep(les) {
+  const nodes = lessonNodes(les), t = today(), k = Math.min(t.step || 0, nodes.length - 1), np = les.p.length;
+  const sg = $('lecSegs'); sg.innerHTML = '';
+  nodes.forEach((_, i) => { const x = el('i'); if (i < k) x.className = 'done'; else if (i === k) x.className = 'now'; sg.appendChild(x); });
+  $('lecStepN').textContent = k < np ? `Punto ${k + 1} de ${np}` : 'Para cerrar · paso ' + (k + 1) + ' de ' + nodes.length;
+  $('lecOne').replaceChildren(nodes[k]);
+  $('lecPrev').disabled = k === 0;
+  $('lecNext').textContent = k === nodes.length - 1 ? 'Terminar y comprobar lo aprendido' : k === np - 1 ? 'Ver el caso práctico' : 'Siguiente punto';
+  $('lecNext').dataset.last = k === nodes.length - 1 ? '1' : '';
+}
+// Marca una lección como estudiada y pasa a las preguntas de esa misma lección.
+function finishLesson(li) {
+  if (li === lessonIdx()) today().lesson = true;
+  if (!S.read.includes(li)) S.read.push(li);
+  save(); showAll = false; render();
+  const qs = lessonQs(li);
+  if (qs.length) startQuiz(shuffle(qs), { title: 'Comprobación de la lección', mode: 'study' });
 }
 const lessonMinutes = les => Math.max(1, Math.round([...les.p, les.ej || '', les.ojo || ''].join(' ').split(/\s+/).length / 180));
 const verDate = v => v.slice(0, 10).split('-').reverse().join('/');
 
 /* ---------- Selección de preguntas ---------- */
 function dailySet() {
-  const qs = allQ(), t = day(), les = lessonOfDay();
+  const qs = poolQ(), t = day(), li = lessonIdx();
   const due = qs.filter(q => S.cards[q.id] && S.cards[q.id].due <= t).sort((a, b) => S.cards[a.id].box - S.cards[b.id].box).slice(0, 6);
   const fresh = shuffle(qs.filter(q => !S.cards[q.id]));
-  const pick = [...due, ...fresh.filter(q => q.a === les.a).slice(0, 3)];
+  const pick = [...due, ...fresh.filter(q => q.l === li).slice(0, 4)];
   for (const q of fresh) { if (pick.length >= 10) break; if (!pick.includes(q)) pick.push(q); }
   for (const q of shuffle(qs)) { if (pick.length >= 10) break; if (!pick.includes(q)) pick.push(q); }
   return shuffle(pick.slice(0, 10));
@@ -457,6 +496,7 @@ function answer(o, btn) {
   paintSegs();
   const fb = $('qzFb'); fb.innerHTML = ''; fb.hidden = false;
   fb.append(el('b', ok ? 'Correcto' : 'Incorrecto', ok ? 'ok' : 'no'), el('p', q.e), el('p', q.n, 'norma'));
+  if (q.l != null && B.lecciones[q.l]) fb.append(el('p', 'Se explica en la lección: ' + B.lecciones[q.l].t, 'norma'));
   $('qzNext').hidden = $('qzFlag').hidden = false;
   $('qzNext').textContent = Z.i + 1 < Z.list.length ? 'Siguiente' : 'Ver resultado';
   $('qzFlag').textContent = S.flags.includes(q.id) ? 'Marcada para verificar' : 'Marcar para verificar';
@@ -477,6 +517,7 @@ function finishQuiz() {
   for (const r of wrong) {
     const d = el('div', null, 'fb');
     d.append(el('b', r.q.q, 'q'), el('p', 'Tu respuesta: ' + r.picked), el('p', 'Correcta: ' + r.q.o[0]), el('p', r.q.e), el('p', r.q.n, 'norma'));
+    if (r.q.l != null && B.lecciones[r.q.l]) d.append(el('p', 'Repásalo en la lección: ' + B.lecciones[r.q.l].t, 'norma'));
     box.appendChild(d);
   }
   $('rsRetry').hidden = !wrong.length;
@@ -495,7 +536,7 @@ $('qzFlag').onclick = () => {
 
 /* ---------- Repaso con tarjetas ---------- */
 let RP = [];
-function repasoList() { const t = day(); return allQ().filter(q => S.cards[q.id] && (S.cards[q.id].box <= 1 || S.cards[q.id].due <= t) && S.cards[q.id].n > S.cards[q.id].ok); }
+function repasoList() { const t = day(); return poolQ().filter(q => S.cards[q.id] && (S.cards[q.id].box <= 1 || S.cards[q.id].due <= t) && S.cards[q.id].n > S.cards[q.id].ok); }
 function showRepaso() {
   if (!RP.length) RP = shuffle(repasoList());
   const q = RP[0];
@@ -527,12 +568,17 @@ function render() {
   $('lecCard').style.setProperty('--c', hue(ci));
   $('lecCurso').textContent = `Curso ${ci + 1} de ${B.programa.length} · ${B.programa[ci].t}`;
   $('lecArea').textContent = AREA[les.a] + ` · lección ${ORDER.findIndex(o => o.li === lessonIdx()) + 1} de ${ORDER.length}`; $('lecT').textContent = les.t;
-  fillLesson($('lecP'), les);
+  const guided = !t.lesson && !showAll;
+  $('lecStep').hidden = !guided; $('lecFull').hidden = guided;
+  if (guided) paintStep(les); else fillLesson($('lecP'), les);
   $('lecLen').textContent = `${les.p.length} puntos · lectura de unos ${lessonMinutes(les)} minutos`;
-  $('lecDone').hidden = !t.lesson; $('lecOk').hidden = !!t.lesson;
-  const due = allQ().filter(q => S.cards[q.id] && S.cards[q.id].due <= day()).length, fresh = allQ().filter(q => !S.cards[q.id]).length;
+  $('lecDone').hidden = !t.lesson; $('lecOk').hidden = !!t.lesson; $('lecQuiz').hidden = !t.lesson; $('lecGuide').hidden = !!t.lesson;
+  const pool = poolQ(), due = pool.filter(q => S.cards[q.id] && S.cards[q.id].due <= day()).length, fresh = pool.filter(q => !S.cards[q.id]).length;
   $('dayDone').hidden = t.daily == null; $('dayDone').textContent = t.daily != null ? 'Hecha: ' + t.daily + '%' : '';
-  $('dayInfo').textContent = `Primero los repasos que vencen hoy (${due}) y luego preguntas nuevas (quedan ${fresh} sin ver).`;
+  $('dayInfo').textContent = pool.length ? (due + fresh ? `Entran solo temas de lecciones que ya leíste: ${due} repasos pendientes y ${fresh} preguntas nuevas.` :
+      'Ya respondiste todo lo de las lecciones leídas. Puedes repetirlas aquí o adelantar otra lección en Programa.') :
+    'Todavía no hay preguntas disponibles. Estudia primero la lección de hoy: la app solo pregunta lo que ya te explicó.';
+  $('dayStart').disabled = !pool.length;
   $('dayStart').textContent = t.daily == null ? 'Empezar la prueba de hoy' : 'Hacer otra ronda';
   // Progreso
   const ds = Object.entries(S.days).filter(([, v]) => v.n), tot = ds.reduce((s, [, v]) => s + v.n, 0), okk = ds.reduce((s, [, v]) => s + v.ok, 0);
@@ -561,11 +607,18 @@ function render() {
       const l = B.lecciones[o.li], det = el('details'), body = el('div', null, 'lec');
       if (S.read.includes(o.li)) det.className = 'leida';
       // El contenido se pinta al abrir, para no cargar todas las lecciones de una vez.
-      det.addEventListener('toggle', () => { if (det.open && !body.childElementCount) fillLesson(body, l); });
+      det.addEventListener('toggle', () => {
+        if (!det.open || body.childElementCount) return;
+        fillLesson(body, l);
+        const row = el('div', null, 'row'), ok = el('button', S.read.includes(o.li) ? 'Comprobar de nuevo' : 'Ya la estudié: comprobar lo aprendido', 'primary');
+        ok.onclick = () => finishLesson(o.li); row.appendChild(ok); body.appendChild(row);
+      });
       det.append(el('summary', l.t), body); card.appendChild(det);
     }
-    const lt = el('p', 'Para profundizar: ' + c.lect.join('; ') + '.', 'sub'), b = el('button', 'Practicar este curso', 'primary');
-    b.onclick = () => startQuiz(shuffle(qs).slice(0, 10), { title: c.t, mode: 'study' });
+    const lt = el('p', 'Para profundizar: ' + c.lect.join('; ') + '.', 'sub'), listas = qs.filter(unlocked);
+    const b = el('button', listas.length ? 'Practicar lo estudiado de este curso' : 'Estudia una lección para practicar');
+    b.disabled = !listas.length;
+    b.onclick = () => startQuiz(shuffle(listas).slice(0, 10), { title: c.t, mode: 'study' });
     const row = el('div', null, 'row'); row.appendChild(b); card.append(lt, row); pl.appendChild(card);
   });
   const fl = $('pgFlags'); fl.innerHTML = '';
@@ -578,7 +631,8 @@ function renderStatic() {
   const nv = $('nvList');
   for (const n of B.novedades) {
     const d = el('div', null, 'nov'), a = el('a', 'Ver la fuente', 'btn'); a.href = n.u; a.target = '_blank'; a.rel = 'noopener';
-    const b = el('button', 'Practicar esta área'); b.onclick = () => startQuiz(shuffle(allQ().filter(q => q.a === n.a)).slice(0, 10), { title: AREA[n.a], mode: 'study' });
+    const b = el('button', 'Practicar esta área');
+    b.onclick = () => { if (!startQuiz(shuffle(poolQ().filter(q => q.a === n.a)).slice(0, 10), { title: AREA[n.a], mode: 'study' })) b.textContent = 'Primero estudia esa área en Programa'; };
     const row = el('div', null, 'row'); row.append(a, b);
     const tg = el('span', n.f.split('-').reverse().join('/') + ' · ' + AREA[n.a], 'tag plain');
     d.append(tg, el('h3', n.t), el('p', n.d), row); nv.appendChild(d);
@@ -593,13 +647,22 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   if (b.dataset.tab === 'repaso') { RP = []; showRepaso(); }
   render(); window.scrollTo(0, 0);
 });
-$('lecOk').onclick = () => { today().lesson = true; if (!S.read.includes(lessonIdx())) S.read.push(lessonIdx()); save(); render(); };
-$('lecQuiz').onclick = () => { const a = lessonOfDay().a; startQuiz(shuffle(allQ().filter(q => q.a === a)).slice(0, 8), { title: AREA[a], mode: 'study' }); };
+$('lecOk').onclick = () => finishLesson(lessonIdx());
+$('lecQuiz').onclick = () => startQuiz(shuffle(lessonQs(lessonIdx())), { title: 'Comprobación de la lección', mode: 'study' });
+$('lecNext').onclick = () => {
+  if ($('lecNext').dataset.last) return finishLesson(lessonIdx());
+  today().step = (today().step || 0) + 1; save(); paintStep(lessonOfDay()); $('lecCard').scrollIntoView({ block: 'start' });
+};
+$('lecPrev').onclick = () => { today().step = Math.max(0, (today().step || 0) - 1); save(); paintStep(lessonOfDay()); };
+$('lecAll').onclick = () => { showAll = true; render(); };
+$('lecGuide').onclick = () => { showAll = false; render(); };
 $('dayStart').onclick = () => startQuiz(dailySet(), { title: 'Prueba diaria', mode: 'study', daily: today().daily == null });
 $('prStart').onclick = () => {
   const sel = [...document.querySelectorAll('#prAreas input:checked')].map(i => i.value);
-  const pool = allQ().filter(q => !sel.length || sel.includes(q.a)), mode = $('prMode').value;
-  if (!startQuiz(shuffle(pool).slice(0, +$('prN').value), { title: mode === 'exam' ? 'Simulacro' : 'Práctica', mode })) $('prMsg').textContent = 'No hay preguntas en esas áreas.';
+  const pool = ($('prAll').checked ? allQ() : poolQ()).filter(q => !sel.length || sel.includes(q.a)), mode = $('prMode').value;
+  $('prMsg').textContent = '';
+  if (!startQuiz(shuffle(pool).slice(0, +$('prN').value), { title: mode === 'exam' ? 'Simulacro' : 'Práctica', mode }))
+    $('prMsg').textContent = 'Aún no hay preguntas disponibles en esas áreas. Estudia primero sus lecciones en Programa, o marca la opción para incluir temas no estudiados.';
 };
 $('owSave').onclick = () => {
   const v = id => $(id).value.trim(), o = [v('owC'), v('ow1'), v('ow2'), v('ow3')];

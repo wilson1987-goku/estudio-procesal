@@ -14,8 +14,10 @@ for (const q of B.preguntas) {
   ids.add(q.id);
   if (!areas.has(q.a)) errores.push(q.id + ': área desconocida ' + q.a);
   if (!Array.isArray(q.o) || q.o.length !== 4 || new Set(q.o).size !== 4) errores.push(q.id + ': necesita cuatro opciones distintas');
-  if (!q.q || !q.e || !q.n) errores.push(q.id + ': falta pregunta, explicación o norma');
+  if (!q.q || !q.e || !q.n) errores.push(q.id + ': falta pregunta, explicación o norma');  if (!Number.isInteger(q.l) || !B.lecciones[q.l]) errores.push(q.id + ': falta el campo l (índice de la lección que explica la respuesta)');
 }
+// Toda lección debe tener al menos dos preguntas propias: la app solo pregunta lo que ya explicó.
+B.lecciones.forEach((l, i) => { if (B.preguntas.filter(q => q.l === i).length < 2) errores.push('la lección ' + i + ' («' + l.t + '») necesita al menos dos preguntas enlazadas'); });
 for (const l of B.lecciones) if (!areas.has(l.a) || !l.t || !Array.isArray(l.p) || l.p.length < 3 || l.p.some(x => typeof x !== 'string')) errores.push('lección inválida: ' + l.t);
 for (const c of B.programa) for (const a of c.areas) if (!areas.has(a)) errores.push('programa: área desconocida ' + a);
 for (const n of B.novedades) if (!n.f || !n.t || !n.d || !/^https:\/\//.test(n.u) || !areas.has(n.a)) errores.push('novedad inválida: ' + n.t);

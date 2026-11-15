@@ -22,6 +22,8 @@ Al abrir el instalador, Android pide permiso para instalar apps de origen descon
 
 ## Reglas del banco
 
+- La app solo pregunta lo que ya explicó. Cada pregunta lleva el campo `l`, el índice (desde 0) de la lección de `lecciones` que explica su respuesta, y queda disponible cuando el usuario estudia esa lección. Antes de agregar una pregunta, la lección enlazada debe explicar el dato que se pregunta; si no lo explica, primero se agrega el punto a la lección.
+- Cada lección debe tener al menos dos preguntas enlazadas; `node actualizar.js` lo verifica.
 - En cada pregunta, la primera opción es la correcta; la app las baraja al mostrarlas.
 - Cada pregunta lleva cuatro opciones distintas, una explicación breve y la norma o sentencia que la sustenta.
 - Al cambiar el contenido hay que subir la fecha de `version` (formato AAAA-MM-DD) o la app no lo tomará como nuevo.
