@@ -2,105 +2,167 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Estudio Procesal</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
-<meta name="theme-color" content="#1d4ed8">
+<meta name="theme-color" content="#F2EFFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#130E2A" media="(prefers-color-scheme: dark)">
 <style>
-/* Layout: columna única de lectura; pestañas arriba, una tarea a la vez. */
+/* Diseño "calcomanías": bordes gruesos, sombras duras, colores planos y un color por curso.
+   Columna única de lectura; navegación en una barra flotante inferior. */
+@font-face{font-family:"Bricolage";src:url("fonts/bricolage.woff2") format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url("fonts/figtree.woff2") format("woff2");font-weight:300 900;font-display:swap}
 :root{
-  --bg:#f4f6fa; --surface:#ffffff; --raise:#eef2f9; --line:#d8dfec; --ink:#162033; --muted:#5c6a82;
-  --accent:#1d4ed8; --on-accent:#ffffff; --good:#15803d; --bad:#b91c1c; --warm:#b45309;
-  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+  --bg:#F2EFFA; --paper:#FFFFFF; --soft:#E9E4F7; --ink:#1A1238; --muted:#5E557F; --edge:#1A1238; --shadow:#1A1238; --dot:rgba(26,18,56,.09);
+  --on:#1A1238;                                   /* texto sobre los colores planos */
+  --coral:#FF5C39; --sun:#FFD24A; --mint:#25D0A2; --sky:#5AA9FF; --pink:#FF8DC7; --violet:#8B6CFF; --orange:#FF9A3D; --teal:#1FB8C4; --lime:#B7E24B;
+  --good:#0B8A66; --bad:#D92F25;
+  --display:"Bricolage","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  --text:"Figtree","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --r:18px; --c:var(--coral);
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#0f1522; --surface:#182032; --raise:#212b42; --line:#2c3854; --ink:#e8edf7; --muted:#9aa7bd;
-    --accent:#7aa2ff; --on-accent:#0b1220; --good:#4ade80; --bad:#f87171; --warm:#fbbf24; color-scheme:dark; }
+  :root{ --bg:#130E2A; --paper:#1F1842; --soft:#2A2156; --ink:#F3EFFF; --muted:#ADA3D4; --edge:#8E7DF0; --shadow:#07041A; --dot:rgba(243,239,255,.07);
+    --good:#3FE0B2; --bad:#FF8076; color-scheme:dark; }
 }
 *{box-sizing:border-box} [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font)}
-main{max-width:760px;margin:0 auto;padding:18px 16px 70px;display:flex;flex-direction:column;gap:16px}
-h1{font-size:24px;margin:0} h2{font-size:18px;margin:0} h3{font-size:15px;margin:0}
-p{margin:0} .sub{color:var(--muted);font-size:14px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .grow{flex:1 1 200px;min-width:0}
-button,.btn{background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;text-align:center}
-button:hover{border-color:var(--muted)} button:disabled{opacity:.5;cursor:not-allowed}
-button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input[type=text],select,textarea{background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;width:100%;min-width:0}
-textarea{min-height:70px;resize:vertical}
-nav{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
-nav button{border:0;background:none;border-radius:0;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;padding:10px 12px}
-nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.stat{background:var(--raise);border-radius:8px;padding:10px 12px}
-.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.stat b{font-size:22px;font-variant-numeric:tabular-nums}
-.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
-.done{color:var(--good);font-weight:600}
-ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
-.opts{display:flex;flex-direction:column;gap:8px}
-.opts button{text-align:left;font-weight:400;line-height:1.4}
-.opts button.ok{border-color:var(--good);box-shadow:inset 4px 0 0 var(--good)}
-.opts button.no{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}
-.fb{background:var(--raise);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
-.fb b.ok{color:var(--good)} .fb b.no{color:var(--bad)}
-.lec{display:flex;flex-direction:column;gap:14px}
-.lec h3{font-size:15px;margin:0 0 3px}
-.lec p{line-height:1.6}
-.nota{border-radius:8px;padding:12px 14px;background:var(--raise);display:flex;flex-direction:column;gap:4px}
-.nota b{font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-.nota.caso b{color:var(--accent)} .nota.ojo b{color:var(--warm)}
-.norma{font-size:13px;color:var(--muted);font-weight:600}
-.bar{height:8px;background:var(--raise);border-radius:4px;overflow:hidden} .bar i{display:block;height:100%;background:var(--accent)}
-.prog{height:5px;background:var(--raise);border-radius:3px;overflow:hidden} .prog i{display:block;height:100%;background:var(--accent);transition:width .2s}
-.arearow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:14px}
-.arearow .bar{grid-column:1/-1}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:300px}
-.cal i{aspect-ratio:1;border-radius:5px;background:var(--raise);display:block}
-.cal i.on{background:var(--accent)} .cal i.today{outline:2px solid var(--warm);outline-offset:1px}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips label{border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:14px;cursor:pointer;background:var(--raise)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.4px);background-size:20px 20px;color:var(--ink);font:400 16.5px/1.6 var(--text)}
+main{max-width:720px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right)) calc(118px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:20px}
+h1,h2,h3,.big,.num,.ltr{font-family:var(--display)}
+h1{font-size:23px;font-weight:800;margin:0;letter-spacing:-.02em;line-height:1.1}
+h2{font-size:22px;font-weight:800;margin:0;letter-spacing:-.02em;line-height:1.18;text-wrap:balance}
+h3{font-size:17px;font-weight:700;margin:0;line-height:1.25}
+p{margin:0} a{color:inherit;text-decoration-thickness:2px;text-underline-offset:3px}
+.sub{color:var(--muted);font-size:14.5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center} .grow{flex:1 1 180px;min-width:0}
+.stack{display:flex;flex-direction:column;gap:20px}
+
+/* Piezas base */
+.card{background:var(--paper);border:2.5px solid var(--edge);border-radius:var(--r);box-shadow:5px 5px 0 var(--shadow);padding:18px;display:flex;flex-direction:column;gap:14px}
+button,.btn{font:700 15.5px/1.2 var(--text);color:var(--ink);background:var(--paper);border:2.5px solid var(--edge);border-radius:13px;padding:11px 16px;cursor:pointer;text-align:center;text-decoration:none;box-shadow:3px 3px 0 var(--shadow);transition:transform .08s,box-shadow .08s}
+button:hover,.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--shadow)}
+button:active,.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+button:disabled{cursor:default;transform:none;box-shadow:3px 3px 0 var(--shadow)}
+button.primary{background:var(--coral);color:var(--on)}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+input[type=text],select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:2.5px solid var(--edge);border-radius:12px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:74px;resize:vertical}
+label{font-weight:600;font-size:14.5px;display:flex;flex-direction:column;gap:5px}
+.tag{display:inline-block;align-self:flex-start;font:700 12px/1 var(--text);text-transform:uppercase;letter-spacing:.07em;color:var(--on);background:var(--c);border:2px solid var(--edge);border-radius:999px;padding:6px 10px}
+.tag.plain{background:var(--soft);color:var(--ink)}
+.pill{font:700 13px/1 var(--text);color:var(--ink);border:2px solid var(--edge);border-radius:999px;padding:7px 11px;background:var(--paper);display:inline-flex;gap:6px;align-items:center}
+.pill.done{background:var(--mint);color:var(--on)}
+.pill.done::before{content:"";width:9px;height:5px;border-left:2.5px solid var(--on);border-bottom:2.5px solid var(--on);transform:rotate(-45deg) translateY(-1px)}
+.msg{color:var(--muted);font-size:14.5px;min-height:1.3em}
+
+/* Cabecera */
+.top{display:flex;gap:12px;align-items:center}
+.top img{border-radius:13px;border:2.5px solid var(--edge);box-shadow:3px 3px 0 var(--shadow)}
+.top .btn,.top button{padding:9px 12px;font-size:14px}
+#updBox{background:var(--sun);color:var(--on)}
+
+/* Barra flotante */
+.dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:2px;padding:6px;width:min(100% - 20px,520px);background:var(--paper);border:2.5px solid var(--edge);border-radius:24px;box-shadow:5px 5px 0 var(--shadow)}
+.dock button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;border:2px solid transparent;border-radius:17px;box-shadow:none;background:none;color:var(--muted);font:700 10.5px/1 var(--text);transition:none}
+.dock button:hover,.dock button:active{transform:none;box-shadow:none}
+.dock button[aria-selected=true]{background:var(--sun);color:var(--on);border-color:var(--edge)}
+.dock svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dock span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* Hoy */
+.hero{background:var(--sun);color:var(--on);position:relative;padding-right:112px;min-height:150px}
+.hero .sub{color:var(--on);opacity:.78}
+.hero h2{font-size:30px}
+.sticker{position:absolute;right:16px;top:16px;width:86px;height:86px;border-radius:50%;background:var(--violet);color:var(--on);border:2.5px solid var(--edge);box-shadow:3px 3px 0 var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(8deg)}
+.sticker b{font:800 36px/1 var(--display)} .sticker small{font:700 10.5px/1.1 var(--text);text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.band{margin:-18px -18px 0;padding:16px 18px;background:var(--c);color:var(--on);border-bottom:2.5px solid var(--edge);border-radius:calc(var(--r) - 3px) calc(var(--r) - 3px) 0 0;display:flex;flex-direction:column;gap:8px}
+.band .sub{color:var(--on);opacity:.8}
+.band .tag{background:var(--paper);color:var(--ink)}
+
+/* Lección */
+.lec{display:flex;flex-direction:column;gap:18px}
+.pt{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.num{width:34px;height:34px;border-radius:11px;background:var(--c);color:var(--on);border:2px solid var(--edge);display:grid;place-items:center;font-weight:800;font-size:15px}
+.pt h3{margin:4px 0 4px} .pt p{line-height:1.65}
+.nota{border:2.5px solid var(--edge);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;color:var(--on)}
+.nota b{align-self:flex-start;font:700 11.5px/1 var(--text);text-transform:uppercase;letter-spacing:.07em;background:var(--paper);color:var(--ink);border:2px solid var(--edge);border-radius:999px;padding:5px 9px}
+.nota.caso{background:var(--mint)} .nota.ojo{background:var(--pink)}
+
+/* Prueba */
+.segs{display:flex;gap:4px} .segs i{flex:1;height:10px;border-radius:5px;border:2px solid var(--edge);background:var(--paper)}
+.segs i.ok{background:var(--mint)} .segs i.no{background:var(--coral)} .segs i.now{background:var(--sun)} .segs i.done{background:var(--sky)}
+#qzQ,#rpQ{font-size:21px;line-height:1.32}
+.opts{display:flex;flex-direction:column;gap:11px}
+.opts button{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;text-align:left;font-weight:500;font-size:16px;line-height:1.4;padding:12px}
+.ltr{width:32px;height:32px;border-radius:10px;border:2px solid var(--edge);background:var(--soft);display:grid;place-items:center;font-weight:800;font-size:15px}
+.opts button:disabled{opacity:.55} .opts button.ok,.opts button.no{opacity:1;color:var(--on)}
+.opts button.ok{background:var(--mint)} .opts button.no{background:var(--coral)}
+.opts button.ok .ltr,.opts button.no .ltr{background:var(--paper);color:var(--ink)}
+.fb{border:2.5px solid var(--edge);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--soft)}
+.fb>b{align-self:flex-start;font:700 12px/1 var(--text);text-transform:uppercase;letter-spacing:.07em;border:2px solid var(--edge);border-radius:999px;padding:6px 10px;color:var(--on)}
+.fb>b.ok{background:var(--mint)} .fb>b.no{background:var(--coral)}
+.fb>b.q{background:none;border:0;padding:0;text-transform:none;letter-spacing:0;font:700 16px/1.35 var(--text);color:var(--ink)}
+.norma{font-size:13.5px;font-weight:700;color:var(--muted)}
+.score{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.score .big{font-size:60px;font-weight:800;line-height:.95;letter-spacing:-.03em;background:var(--c);color:var(--on);border:2.5px solid var(--edge);border-radius:20px;padding:12px 18px;box-shadow:4px 4px 0 var(--shadow);transform:rotate(-3deg)}
+
+/* Programa */
+.curso .band{flex-direction:row;gap:14px;align-items:center}
+.curso .band .big{font-size:46px;font-weight:800;line-height:.9;letter-spacing:-.04em}
+.bar{height:14px;background:var(--paper);border:2px solid var(--edge);border-radius:8px;overflow:hidden} .bar i{display:block;height:100%;background:var(--c);border-right:2px solid var(--edge)} .bar i[style*="width: 0"]{border:0}
+details{border:2px solid var(--edge);border-radius:13px;background:var(--paper);overflow:hidden}
+summary{cursor:pointer;font-weight:700;padding:12px 14px;list-style:none;display:flex;gap:10px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";flex:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--edge);background:var(--soft);display:grid;place-items:center;font:800 16px/1 var(--display)}
+details[open]>summary::before{content:"–";background:var(--c);color:var(--on)}
+details.leida>summary::after{content:"Leída";margin-left:auto;flex:none;font:700 11px/1 var(--text);text-transform:uppercase;letter-spacing:.06em;background:var(--mint);color:var(--on);border:2px solid var(--edge);border-radius:999px;padding:5px 8px}
+details>.lec{padding:6px 14px 16px;border-top:2px solid var(--edge);padding-top:16px}
+
+/* Práctica, novedades, progreso */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips label{flex-direction:row;border:2px solid var(--edge);border-radius:999px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--paper)}
 .chips input{position:absolute;opacity:0;pointer-events:none}
-.chips label:has(input:checked){border-color:var(--accent);color:var(--accent);font-weight:600}
-.chips label:has(input:focus-visible){outline:2px solid var(--accent)}
-.nov{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
-.nov:first-of-type{border-top:0;padding-top:0}
-a{color:var(--accent)}
-.msg{color:var(--muted);font-size:14px;min-height:1.3em}
+.chips label:has(input:checked){background:var(--sky);color:var(--on);box-shadow:2px 2px 0 var(--shadow)}
+.chips label:has(input:focus-visible){outline:3px solid var(--violet);outline-offset:2px}
+.nov{border:2px solid var(--edge);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--paper)}
+ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px}
+.stat{border:2.5px solid var(--edge);border-radius:15px;padding:12px 14px;background:var(--c);color:var(--on);box-shadow:3px 3px 0 var(--shadow)}
+.stat small{display:block;font:700 11px/1.2 var(--text);text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.stat b{font:800 34px/1.05 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;max-width:330px}
+.cal i{aspect-ratio:1;border-radius:9px;border:2px solid var(--edge);background:var(--paper);display:block}
+.cal i.on{background:var(--mint)} .cal i.today{box-shadow:3px 3px 0 var(--shadow);background:var(--sun)} .cal i.today.on{background:var(--mint)}
+.arearow{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-weight:600;font-size:15px}
+.arearow .bar{grid-column:1/-1}
+@media (prefers-reduced-motion: reduce){ button,.btn{transition:none} }
+@media (max-width:520px){ .top .sub{display:none} .top .btn,.top button{padding:8px 10px;font-size:13px} }
+details .pt{grid-template-columns:30px 1fr;gap:10px} details .num{width:30px;height:30px;font-size:14px}
+@media (max-width:420px){ .hero h2{font-size:26px} .stat b{font-size:30px} .score .big{font-size:50px} }
 </style>
 </head>
 <body>
 <main>
-  <header class="row">
-    <img src="icon.svg" alt="" width="42" height="42" style="border-radius:10px">
+  <header class="top">
+    <img src="icon.svg" alt="" width="46" height="46">
     <div class="grow"><h1>Estudio Procesal</h1><p class="sub">Derecho procesal colombiano, un poco cada día.</p></div>
-    <a class="btn" id="apkLink" href="EstudioProcesal.apk" download hidden>Descargar para Android</a>
+    <a class="btn" id="apkLink" href="EstudioProcesal.apk" download hidden>Descargar app</a>
     <button id="installBtn" hidden>Instalar app</button>
   </header>
 
   <div class="card" id="updBox" hidden>
-    <div class="row"><p class="grow" id="updMsg"></p><button class="primary" id="updGo">Actualizar ahora</button></div>
+    <div class="row"><p class="grow" id="updMsg" style="font-weight:600"></p><button id="updGo">Actualizar ahora</button></div>
   </div>
-
-  <nav role="tablist" id="nav">
-    <button role="tab" data-tab="hoy" aria-selected="true">Hoy</button>
-    <button role="tab" data-tab="programa" aria-selected="false">Programa</button>
-    <button role="tab" data-tab="practica" aria-selected="false">Práctica</button>
-    <button role="tab" data-tab="repaso" aria-selected="false">Repaso</button>
-    <button role="tab" data-tab="novedades" aria-selected="false">Novedades</button>
-    <button role="tab" data-tab="progreso" aria-selected="false">Progreso</button>
-  </nav>
 
   <!-- Vista de prueba en curso (reemplaza a las pestañas mientras dura) -->
   <section class="card" id="quiz" hidden>
-    <div class="row"><span class="tag grow" id="qzTitle"></span><span class="sub" id="qzCount"></span><span class="sub" id="qzClock"></span></div>
-    <div class="prog"><i id="qzBar"></i></div>
-    <p class="tag" id="qzArea"></p>
-    <h2 id="qzQ" style="font-weight:600;line-height:1.4"></h2>
+    <div class="row"><span class="tag grow" id="qzTitle" style="flex:0 1 auto"></span><span class="grow"></span><span class="pill" id="qzCount"></span><span class="pill" id="qzClock" hidden></span></div>
+    <div class="segs" id="qzSegs"></div>
+    <p class="sub" id="qzArea" style="font-weight:700"></p>
+    <h2 id="qzQ"></h2>
     <div class="opts" id="qzOpts"></div>
     <div class="fb" id="qzFb" hidden></div>
     <div class="row">
@@ -112,46 +174,56 @@ a{color:var(--accent)}
   </section>
   <section class="card" id="result" hidden>
     <h2 id="rsTitle"></h2>
-    <div class="stats"><div class="stat"><small>Aciertos</small><b id="rsScore"></b></div><div class="stat"><small>Porcentaje</small><b id="rsPct"></b></div></div>
-    <p id="rsMsg"></p>
-    <div id="rsWrong" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="score"><span class="big" id="rsPct"></span><div><p style="font-weight:700;font-size:18px" id="rsScore"></p><p class="sub">respuestas correctas</p></div></div>
+    <p id="rsMsg" style="font-weight:600"></p>
+    <div id="rsWrong" style="display:flex;flex-direction:column;gap:12px"></div>
     <div class="row"><button class="primary" id="rsBack">Volver</button><button id="rsRetry" hidden>Repetir las falladas</button></div>
   </section>
 
   <div id="tabs">
-  <section id="tab-hoy" style="display:flex;flex-direction:column;gap:16px">
-    <div class="card">
-      <div class="row"><h2 class="grow" id="hoyFecha"></h2><span id="hoyRacha" class="tag"></span></div>
-      <p class="sub" id="hoyPlan"></p>
+  <section id="tab-hoy" class="stack">
+    <div class="card hero">
+      <div class="sticker" aria-hidden="true"><b id="hoyRachaN">0</b><small id="hoyRachaL">días de racha</small></div>
+      <p class="sub" style="font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:12.5px">Hoy</p>
+      <h2 id="hoyFecha"></h2>
+      <p id="hoyPlan" style="font-weight:600"></p>
+      <div class="row"><span class="pill" id="ckLec">Lección</span><span class="pill" id="ckQuiz">Prueba diaria</span></div>
+      <span id="hoyRacha" hidden></span>
     </div>
-    <div class="card">
-      <div class="row"><span class="tag grow">1 · Lección de hoy</span><span id="lecDone" class="done" hidden>✓ Leída</span></div>
-      <p class="tag" id="lecCurso"></p>
-      <p class="sub" id="lecArea"></p>
-      <h2 id="lecT"></h2>
-      <p class="sub" id="lecLen"></p>
+
+    <div class="card" id="lecCard">
+      <div class="band">
+        <span class="tag" id="lecCurso"></span>
+        <h2 id="lecT"></h2>
+        <p class="sub" id="lecArea"></p>
+      </div>
+      <div class="row"><span class="pill" id="lecLen"></span><span id="lecDone" class="pill done" hidden>Leída</span></div>
       <div class="lec" id="lecP"></div>
       <div class="row"><button class="primary" id="lecOk">Ya la estudié</button><button id="lecQuiz">Practicar este tema</button></div>
     </div>
-    <div class="card">
-      <div class="row"><span class="tag grow">2 · Prueba diaria</span><span id="dayDone" class="done" hidden></span></div>
+
+    <div class="card" style="--c:var(--sky)">
+      <div class="band">
+        <span class="tag">Prueba diaria</span>
+        <h2>Diez preguntas para fijar lo aprendido</h2>
+      </div>
       <p id="dayInfo"></p>
-      <div class="row"><button class="primary" id="dayStart">Empezar la prueba de hoy</button></div>
+      <div class="row"><button class="primary" id="dayStart">Empezar la prueba de hoy</button><span id="dayDone" class="pill done" hidden></span></div>
     </div>
     <p class="sub">Material de estudio. Cada pregunta cita la norma: confirma siempre el texto vigente antes de usarlo en un caso real.</p>
   </section>
 
-  <section id="tab-programa" hidden style="display:flex;flex-direction:column;gap:16px">
+  <section id="tab-programa" hidden class="stack">
     <div class="card">
       <h2>Programa de estudio</h2>
       <p class="sub">Nueve cursos en el orden en que se enseñan en las facultades de derecho colombianas: primero la teoría general, luego el proceso civil y las pruebas, y después los procesales especializados. La lección diaria avanza por este orden.</p>
       <p class="sub">El contenido está redactado a partir de las normas vigentes. Los libros aparecen como lectura para profundizar; confirma siempre la edición más reciente.</p>
     </div>
-    <div id="pgmList" style="display:flex;flex-direction:column;gap:16px"></div>
+    <div id="pgmList" class="stack"></div>
   </section>
 
-  <section class="card" id="tab-practica" hidden>
-    <h2>Práctica libre</h2>
+  <section class="card" id="tab-practica" hidden style="--c:var(--sky)">
+    <div class="band"><span class="tag">Práctica libre</span><h2>Arma tu propia ronda</h2></div>
     <p class="sub">Elige las áreas. Sin marcar ninguna, se usan todas.</p>
     <div class="chips" id="prAreas"></div>
     <div class="row">
@@ -162,12 +234,12 @@ a{color:var(--accent)}
     <p class="msg" id="prMsg"></p>
   </section>
 
-  <section class="card" id="tab-repaso" hidden>
-    <h2>Repaso de lo que has fallado</h2>
+  <section class="card" id="tab-repaso" hidden style="--c:var(--pink)">
+    <div class="band"><span class="tag">Repaso</span><h2>Lo que has fallado, otra vez</h2></div>
     <p class="sub" id="rpInfo"></p>
-    <div id="rpCard" hidden style="display:flex;flex-direction:column;gap:12px">
-      <p class="tag" id="rpArea"></p>
-      <h2 id="rpQ" style="font-weight:600;line-height:1.4"></h2>
+    <div id="rpCard" hidden style="display:flex;flex-direction:column;gap:14px">
+      <p class="sub" id="rpArea" style="font-weight:700"></p>
+      <h2 id="rpQ"></h2>
       <div class="fb" id="rpA" hidden></div>
       <div class="row">
         <button class="primary" id="rpShow">Mostrar respuesta</button>
@@ -176,8 +248,11 @@ a{color:var(--accent)}
     </div>
   </section>
 
-  <section id="tab-novedades" hidden style="display:flex;flex-direction:column;gap:16px">
-    <div class="card"><h2>Reformas y novedades recientes</h2><p class="sub" id="nvVer"></p><div id="nvList" style="display:flex;flex-direction:column;gap:12px"></div></div>
+  <section id="tab-novedades" hidden class="stack">
+    <div class="card" style="--c:var(--orange)">
+      <div class="band"><span class="tag">Novedades</span><h2>Reformas y cambios recientes</h2><p class="sub" id="nvVer"></p></div>
+      <div id="nvList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
     <div class="card"><h2>Fuentes oficiales para revisar</h2><p class="sub">Dedica cinco minutos al día a una de ellas y anota abajo lo que encuentres.</p><ul id="nvSrc"></ul></div>
     <div class="card">
       <h2>Agregar lo que aprendí hoy</h2>
@@ -195,19 +270,19 @@ a{color:var(--accent)}
     </div>
   </section>
 
-  <section id="tab-progreso" hidden style="display:flex;flex-direction:column;gap:16px">
+  <section id="tab-progreso" hidden class="stack">
     <div class="card">
       <h2>Tu avance</h2>
       <div class="stats">
-        <div class="stat"><small>Racha</small><b id="pgStreak">0</b></div>
-        <div class="stat"><small>Días de estudio</small><b id="pgDays">0</b></div>
-        <div class="stat"><small>Respondidas</small><b id="pgTotal">0</b></div>
-        <div class="stat"><small>Acierto</small><b id="pgAcc">—</b></div>
+        <div class="stat" style="--c:var(--violet)"><small>Racha</small><b id="pgStreak">0</b></div>
+        <div class="stat" style="--c:var(--sun)"><small>Días de estudio</small><b id="pgDays">0</b></div>
+        <div class="stat" style="--c:var(--sky)"><small>Respondidas</small><b id="pgTotal">0</b></div>
+        <div class="stat" style="--c:var(--mint)"><small>Acierto</small><b id="pgAcc">—</b></div>
       </div>
       <h3>Últimas cuatro semanas</h3>
       <div class="cal" id="pgCal"></div>
     </div>
-    <div class="card"><h2>Dominio por área</h2><p class="sub">Una pregunta cuenta como dominada cuando la aciertas en repasos espaciados.</p><div id="pgAreas" style="display:flex;flex-direction:column;gap:12px"></div></div>
+    <div class="card"><h2>Dominio por área</h2><p class="sub">Una pregunta cuenta como dominada cuando la aciertas en repasos espaciados.</p><div id="pgAreas" style="display:flex;flex-direction:column;gap:16px"></div></div>
     <div class="card"><h2>Preguntas marcadas para verificar</h2><p class="sub" id="pgFlagInfo"></p><ul id="pgFlags"></ul></div>
     <div class="card">
       <h2>Copia de seguridad</h2>
@@ -219,6 +294,15 @@ a{color:var(--accent)}
   </section>
   </div>
 </main>
+
+<nav class="dock" role="tablist" id="nav" aria-label="Secciones">
+  <button role="tab" data-tab="hoy" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></svg><span>Hoy</span></button>
+  <button role="tab" data-tab="programa" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 7.5 12 12l9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5"/></svg><span>Programa</span></button>
+  <button role="tab" data-tab="practica" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg><span>Práctica</span></button>
+  <button role="tab" data-tab="repaso" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.4M4 4v4h4M4 13a8 8 0 0 0 14.3 4.4M20 20v-4h-4"/></svg><span>Repaso</span></button>
+  <button role="tab" data-tab="novedades" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"/></svg><span>Noticias</span></button>
+  <button role="tab" data-tab="progreso" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Progreso</span></button>
+</nav>
 
 <script src="banco.js"></script>
 <script>
@@ -237,8 +321,8 @@ async function checkUpdate() {
     const c = await r.json();
     if (!okBank(c) || c.version <= B.version) return;
     localStorage.setItem('ep.banco', JSON.stringify(c));
-    document.getElementById('updMsg').textContent = `Hay contenido nuevo del ${c.version.slice(0, 10).split('-').reverse().join('/')}: lecciones y preguntas actualizadas.`;
-    document.getElementById('updBox').hidden = false;
+    $('updMsg').textContent = `Hay contenido nuevo del ${c.version.slice(0, 10).split('-').reverse().join('/')}: lecciones y preguntas actualizadas.`;
+    $('updBox').hidden = false;
   } catch {}
 }
 const AREA = Object.fromEntries(B.areas.map(a => [a.id, a.n]));
@@ -278,6 +362,9 @@ B.programa.forEach((c, ci) => c.areas.forEach(a => {
   B.lecciones.map((l, li) => li).filter(li => B.lecciones[li].a === a).sort((x, y) => key(x) - key(y)).forEach(li => ORDER.push({ li, ci }));
 }));
 const courseOf = area => B.programa.findIndex(c => c.areas.includes(area));
+// Cada curso tiene su color; se usa en lecciones, programa y barras de avance.
+const HUES = ['coral', 'sun', 'mint', 'sky', 'pink', 'violet', 'orange', 'teal', 'lime'];
+const hue = ci => `var(--${HUES[(ci < 0 ? 0 : ci) % HUES.length]})`;
 // La lección del día es la siguiente sin leer del programa; queda fija durante el día.
 function lessonIdx() {
   const t = today();
@@ -294,10 +381,10 @@ const lessonOfDay = () => B.lecciones[lessonIdx()];
 function fillLesson(box, les) {
   box.innerHTML = '';
   les.p.forEach((txt, i) => {
-    const k = txt.indexOf(': '), d = el('div');
-    if (k > 0 && k <= 70) d.append(el('h3', (i + 1) + '. ' + txt.slice(0, k)), el('p', txt.slice(k + 2)));
-    else d.append(el('p', txt));
-    box.appendChild(d);
+    const k = txt.indexOf(': '), d = el('div', null, 'pt'), body = el('div');
+    if (k > 0 && k <= 70) body.append(el('h3', txt.slice(0, k)), el('p', txt.slice(k + 2)));
+    else body.append(el('p', txt));
+    d.append(el('span', String(i + 1), 'num'), body); box.appendChild(d);
   });
   if (les.ej) { const n = el('div', null, 'nota caso'); n.append(el('b', 'Caso práctico'), el('p', les.ej)); box.appendChild(n); }
   if (les.ojo) { const n = el('div', null, 'nota ojo'); n.append(el('b', 'Error frecuente'), el('p', les.ojo)); box.appendChild(n); }
@@ -323,34 +410,49 @@ function startQuiz(list, opts) {
   Z = { list, i: 0, res: [], mode: opts.mode || 'study', title: opts.title, daily: !!opts.daily, t0: Date.now(), limit: opts.mode === 'exam' ? list.length * 90 : 0 };
   $('tabs').hidden = $('nav').hidden = true; $('result').hidden = true; $('quiz').hidden = false;
   clearInterval(startQuiz.iv);
+  $('qzClock').hidden = !Z.limit; $('qzClock').textContent = '';
   if (Z.limit) startQuiz.iv = setInterval(() => {
     const left = Z.limit - Math.floor((Date.now() - Z.t0) / 1000);
-    $('qzClock').textContent = '⏱ ' + Math.max(0, Math.floor(left / 60)) + ':' + String(Math.max(0, left % 60)).padStart(2, '0');
+    $('qzClock').textContent = Math.max(0, Math.floor(left / 60)) + ':' + String(Math.max(0, left % 60)).padStart(2, '0');
     if (left <= 0) finishQuiz();
   }, 500);
-  $('qzClock').textContent = '';
   showQ(); window.scrollTo(0, 0); return true;
+}
+// Barra por segmentos: verde acertada, coral fallada, amarillo la actual.
+function paintSegs() {
+  const sg = $('qzSegs'); sg.innerHTML = '';
+  Z.list.forEach((_, i) => {
+    const s = el('i'), r = Z.res[i];
+    if (r) s.className = Z.mode === 'exam' ? 'done' : r.ok ? 'ok' : 'no'; else if (i === Z.i) s.className = 'now';
+    sg.appendChild(s);
+  });
 }
 function showQ() {
   const q = Z.list[Z.i];
   $('qzTitle').textContent = Z.title; $('qzCount').textContent = (Z.i + 1) + ' de ' + Z.list.length;
-  $('qzBar').style.width = (100 * Z.i / Z.list.length) + '%';
+  $('quiz').style.setProperty('--c', hue(courseOf(q.a)));
+  paintSegs();
   $('qzArea').textContent = AREA[q.a] || 'Mis preguntas'; $('qzQ').textContent = q.q;
   $('qzFb').hidden = $('qzNext').hidden = $('qzFlag').hidden = true;
   const box = $('qzOpts'); box.innerHTML = '';
-  for (const o of shuffle(q.o)) { const b = el('button', o); b.onclick = () => answer(o, b); box.appendChild(b); }
+  shuffle(q.o).forEach((o, i) => {
+    const b = el('button'); b.dataset.o = o;
+    b.append(el('span', 'ABCD'[i], 'ltr'), el('span', o));
+    b.onclick = () => answer(o, b); box.appendChild(b);
+  });
 }
 function answer(o, btn) {
   const q = Z.list[Z.i], ok = o === q.o[0];
   Z.res.push({ q, ok, picked: o }); grade(q, ok);
   if (Z.mode === 'exam') return next();
-  for (const b of $('qzOpts').children) { b.disabled = true; if (b.textContent === q.o[0]) b.classList.add('ok'); }
+  for (const b of $('qzOpts').children) { b.disabled = true; if (b.dataset.o === q.o[0]) b.classList.add('ok'); }
   if (!ok) btn.classList.add('no');
+  paintSegs();
   const fb = $('qzFb'); fb.innerHTML = ''; fb.hidden = false;
-  fb.append(el('b', ok ? '✓ Correcto' : '✗ Incorrecto', ok ? 'ok' : 'no'), el('p', q.e), el('p', q.n, 'norma'));
+  fb.append(el('b', ok ? 'Correcto' : 'Incorrecto', ok ? 'ok' : 'no'), el('p', q.e), el('p', q.n, 'norma'));
   $('qzNext').hidden = $('qzFlag').hidden = false;
   $('qzNext').textContent = Z.i + 1 < Z.list.length ? 'Siguiente' : 'Ver resultado';
-  $('qzFlag').textContent = S.flags.includes(q.id) ? 'Marcada para verificar ✓' : 'Marcar para verificar';
+  $('qzFlag').textContent = S.flags.includes(q.id) ? 'Marcada para verificar' : 'Marcar para verificar';
   $('qzNext').focus();
 }
 function next() { Z.i++; if (Z.i >= Z.list.length) finishQuiz(); else { showQ(); window.scrollTo(0, 0); } }
@@ -359,6 +461,7 @@ function finishQuiz() {
   const ok = Z.res.filter(r => r.ok).length, n = Z.list.length, pct = Math.round(100 * ok / n);
   if (Z.daily && Z.res.length === n) { today().daily = pct; save(); }
   $('quiz').hidden = true; $('result').hidden = false;
+  $('result').style.setProperty('--c', pct >= 80 ? 'var(--mint)' : pct >= 60 ? 'var(--sun)' : 'var(--coral)');
   $('rsTitle').textContent = Z.title + ': resultado';
   $('rsScore').textContent = ok + ' / ' + n; $('rsPct').textContent = pct + '%';
   $('rsMsg').textContent = Z.res.length < n ? 'Se acabó el tiempo: las preguntas sin responder cuentan como falladas.' :
@@ -366,7 +469,7 @@ function finishQuiz() {
   const wrong = Z.res.filter(r => !r.ok), box = $('rsWrong'); box.innerHTML = '';
   for (const r of wrong) {
     const d = el('div', null, 'fb');
-    d.append(el('b', r.q.q), el('p', 'Tu respuesta: ' + r.picked), el('p', 'Correcta: ' + r.q.o[0]), el('p', r.q.e), el('p', r.q.n, 'norma'));
+    d.append(el('b', r.q.q, 'q'), el('p', 'Tu respuesta: ' + r.picked), el('p', 'Correcta: ' + r.q.o[0]), el('p', r.q.e), el('p', r.q.n, 'norma'));
     box.appendChild(d);
   }
   $('rsRetry').hidden = !wrong.length;
@@ -380,7 +483,7 @@ $('rsBack').onclick = closeQuiz;
 $('qzFlag').onclick = () => {
   const id = Z.list[Z.i].id, k = S.flags.indexOf(id);
   if (k < 0) S.flags.push(id); else S.flags.splice(k, 1);
-  save(); $('qzFlag').textContent = k < 0 ? 'Marcada para verificar ✓' : 'Marcar para verificar';
+  save(); $('qzFlag').textContent = k < 0 ? 'Marcada para verificar' : 'Marcar para verificar';
 };
 
 /* ---------- Repaso con tarjetas ---------- */
@@ -397,7 +500,8 @@ function showRepaso() {
 }
 $('rpShow').onclick = () => {
   const q = RP[0], a = $('rpA'); a.innerHTML = ''; a.hidden = false;
-  a.append(el('b', q.o[0], 'ok'), el('p', q.e), el('p', q.n, 'norma'));
+  a.append(el('b', 'Respuesta', 'ok'), el('p', q.o[0]), el('p', q.e), el('p', q.n, 'norma'));
+  a.children[1].style.fontWeight = '700';
   $('rpShow').hidden = true; $('rpYes').hidden = $('rpNo').hidden = false;
 };
 const rpGrade = ok => { grade(RP.shift(), ok); showRepaso(); };
@@ -407,18 +511,21 @@ $('rpYes').onclick = () => rpGrade(true); $('rpNo').onclick = () => rpGrade(fals
 function render() {
   const t = today(), les = lessonOfDay(), st = streak();
   $('hoyFecha').textContent = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, c => c.toUpperCase());
+  $('hoyRachaN').textContent = st; $('hoyRachaL').textContent = st === 1 ? 'día de racha' : 'días de racha';
   $('hoyRacha').textContent = st ? st + (st === 1 ? ' día seguido' : ' días seguidos') : '';
   const pend = [!t.lesson && 'la lección', t.daily == null && 'la prueba diaria'].filter(Boolean);
   $('hoyPlan').textContent = pend.length ? 'Te falta hoy: ' + pend.join(' y ') + '.' : 'Cumpliste el estudio de hoy. Puedes seguir en Práctica o Repaso.';
+  $('ckLec').classList.toggle('done', !!t.lesson); $('ckQuiz').classList.toggle('done', t.daily != null);
   const ci = courseOf(les.a);
+  $('lecCard').style.setProperty('--c', hue(ci));
   $('lecCurso').textContent = `Curso ${ci + 1} de ${B.programa.length} · ${B.programa[ci].t}`;
   $('lecArea').textContent = AREA[les.a] + ` · lección ${ORDER.findIndex(o => o.li === lessonIdx()) + 1} de ${ORDER.length}`; $('lecT').textContent = les.t;
   fillLesson($('lecP'), les);
   $('lecLen').textContent = `${les.p.length} puntos · lectura de unos ${lessonMinutes(les)} minutos`;
   $('lecDone').hidden = !t.lesson; $('lecOk').hidden = !!t.lesson;
   const due = allQ().filter(q => S.cards[q.id] && S.cards[q.id].due <= day()).length, fresh = allQ().filter(q => !S.cards[q.id]).length;
-  $('dayDone').hidden = t.daily == null; $('dayDone').textContent = t.daily != null ? '✓ Hecha: ' + t.daily + '%' : '';
-  $('dayInfo').textContent = `Diez preguntas: primero los repasos que vencen hoy (${due}) y luego preguntas nuevas (quedan ${fresh} sin ver).`;
+  $('dayDone').hidden = t.daily == null; $('dayDone').textContent = t.daily != null ? 'Hecha: ' + t.daily + '%' : '';
+  $('dayInfo').textContent = `Primero los repasos que vencen hoy (${due}) y luego preguntas nuevas (quedan ${fresh} sin ver).`;
   $('dayStart').textContent = t.daily == null ? 'Empezar la prueba de hoy' : 'Hacer otra ronda';
   // Progreso
   const ds = Object.entries(S.days).filter(([, v]) => v.n), tot = ds.reduce((s, [, v]) => s + v.n, 0), okk = ds.reduce((s, [, v]) => s + v.ok, 0);
@@ -429,6 +536,7 @@ function render() {
   for (const a of B.areas) {
     const qs = allQ().filter(q => q.a === a.id), dom = qs.filter(q => (S.cards[q.id]?.box || 0) >= 3).length, seen = qs.filter(q => S.cards[q.id]).length;
     const r = el('div', null, 'arearow'), bar = el('div', null, 'bar'), f = el('i'); f.style.width = (qs.length ? 100 * dom / qs.length : 0) + '%'; bar.appendChild(f);
+    r.style.setProperty('--c', hue(courseOf(a.id)));
     r.append(el('span', a.n), el('span', `${dom} de ${qs.length} dominadas · ${seen} vistas`, 'sub'), bar); pa.appendChild(r);
   }
   // Programa
@@ -436,14 +544,18 @@ function render() {
   B.programa.forEach((c, ci) => {
     const qs = allQ().filter(q => c.areas.includes(q.a)), dom = qs.filter(q => (S.cards[q.id]?.box || 0) >= 3).length;
     const les = ORDER.filter(o => o.ci === ci), leidas = les.filter(o => S.read.includes(o.li)).length;
-    const card = el('div', null, 'card'), bar = el('div', null, 'bar'), f = el('i'); f.style.width = (qs.length ? 100 * dom / qs.length : 0) + '%'; bar.appendChild(f);
-    card.append(el('span', 'Curso ' + (ci + 1), 'tag'), el('h2', c.t), el('p', c.d, 'sub'), bar,
-      el('p', `${leidas} de ${les.length} lecciones leídas · ${dom} de ${qs.length} preguntas dominadas`, 'sub'));
+    const card = el('div', null, 'card curso'), band = el('div', null, 'band'), head = el('div');
+    card.style.setProperty('--c', hue(ci));
+    head.append(el('h2', c.t), el('p', c.d, 'sub'));
+    band.append(el('span', String(ci + 1).padStart(2, '0'), 'big'), head);
+    const bar = el('div', null, 'bar'), f = el('i'); f.style.width = (qs.length ? 100 * dom / qs.length : 0) + '%'; bar.appendChild(f);
+    card.append(band, bar, el('p', `${leidas} de ${les.length} lecciones leídas · ${dom} de ${qs.length} preguntas dominadas`, 'sub'));
     for (const o of les) {
-      const l = B.lecciones[o.li], det = el('details'), sum = el('summary', (S.read.includes(o.li) ? '✓ ' : '') + l.t), body = el('div', null, 'lec');
-      sum.style.cssText = 'cursor:pointer;font-weight:600'; body.style.marginTop = '10px';
-      fillLesson(body, l);
-      det.append(sum, body); card.appendChild(det);
+      const l = B.lecciones[o.li], det = el('details'), body = el('div', null, 'lec');
+      if (S.read.includes(o.li)) det.className = 'leida';
+      // El contenido se pinta al abrir, para no cargar todas las lecciones de una vez.
+      det.addEventListener('toggle', () => { if (det.open && !body.childElementCount) fillLesson(body, l); });
+      det.append(el('summary', l.t), body); card.appendChild(det);
     }
     const lt = el('p', 'Para profundizar: ' + c.lect.join('; ') + '.', 'sub'), b = el('button', 'Practicar este curso', 'primary');
     b.onclick = () => startQuiz(shuffle(qs).slice(0, 10), { title: c.t, mode: 'study' });
@@ -458,10 +570,11 @@ function renderStatic() {
   const pr = $('prAreas'); for (const a of B.areas) { const l = el('label'), i = el('input'); i.type = 'checkbox'; i.value = a.id; l.append(i, a.n); pr.appendChild(l); $('owA').add(new Option(a.n, a.id)); }
   const nv = $('nvList');
   for (const n of B.novedades) {
-    const d = el('div', null, 'nov'), a = el('a', 'Ver la fuente'); a.href = n.u; a.target = '_blank'; a.rel = 'noopener';
+    const d = el('div', null, 'nov'), a = el('a', 'Ver la fuente', 'btn'); a.href = n.u; a.target = '_blank'; a.rel = 'noopener';
     const b = el('button', 'Practicar esta área'); b.onclick = () => startQuiz(shuffle(allQ().filter(q => q.a === n.a)).slice(0, 10), { title: AREA[n.a], mode: 'study' });
     const row = el('div', null, 'row'); row.append(a, b);
-    d.append(el('span', n.f.split('-').reverse().join('/') + ' · ' + AREA[n.a], 'tag'), el('h3', n.t), el('p', n.d), row); nv.appendChild(d);
+    const tg = el('span', n.f.split('-').reverse().join('/') + ' · ' + AREA[n.a], 'tag plain');
+    d.append(tg, el('h3', n.t), el('p', n.d), row); nv.appendChild(d);
   }
   for (const f of B.fuentes) { const li = el('li'), a = el('a', f.t); a.href = f.u; a.target = '_blank'; a.rel = 'noopener'; li.appendChild(a); $('nvSrc').appendChild(li); }
 }
@@ -471,7 +584,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(o => o.setAttribute('aria-selected', o === b));
   for (const t of ['hoy', 'programa', 'practica', 'repaso', 'novedades', 'progreso']) $('tab-' + t).hidden = t !== b.dataset.tab;
   if (b.dataset.tab === 'repaso') { RP = []; showRepaso(); }
-  render();
+  render(); window.scrollTo(0, 0);
 });
 $('lecOk').onclick = () => { today().lesson = true; if (!S.read.includes(lessonIdx())) S.read.push(lessonIdx()); save(); render(); };
 $('lecQuiz').onclick = () => { const a = lessonOfDay().a; startQuiz(shuffle(allQ().filter(q => q.a === a)).slice(0, 8), { title: AREA[a], mode: 'study' }); };

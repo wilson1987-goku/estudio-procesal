@@ -60,6 +60,7 @@ public class AppClient extends WebViewClient {
         if (p.endsWith(".png")) return "image/png";
         if (p.endsWith(".webmanifest")) return "application/manifest+json";
         if (p.endsWith(".css")) return "text/css";
+        if (p.endsWith(".woff2")) return "font/woff2";
         return "application/octet-stream";
     }
 }

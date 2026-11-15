@@ -13,6 +13,7 @@ Al abrir el instalador, Android pide permiso para instalar apps de origen descon
 
 - `EstudioProcesal.apk`: instalador de Android, siempre en su versión más reciente.
 - `android/`: código de la app Android. El archivo de firma no se publica.
+- `fonts/`: tipografías de la interfaz, Bricolage Grotesque y Figtree, incluidas para que la app funcione sin conexión. Ambas se distribuyen bajo la SIL Open Font License; el texto de cada licencia está en la misma carpeta.
 
 - `index.html`: la aplicación.
 - `banco.js`: el contenido (áreas, preguntas, lecciones, programa, novedades y fuentes). Es el archivo que se edita.

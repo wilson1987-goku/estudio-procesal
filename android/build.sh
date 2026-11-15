@@ -9,6 +9,7 @@ mkdir -p "$W/res" "$W/gen" "$W/classes" "$W/dex" "$HERE/assets" "$HERE/res/mipma
 
 # Contenido web e icono
 cp "$WEB/index.html" "$WEB/banco.js" "$WEB/icon.svg" "$WEB/icon-180.png" "$WEB/manifest.webmanifest" "$HERE/assets/"
+mkdir -p "$HERE/assets/fonts" && cp "$WEB/fonts/"*.woff2 "$HERE/assets/fonts/"
 cp "$WEB/icon-192.png" "$HERE/res/mipmap-xxxhdpi/ic_launcher.png"
 
 # Recursos y manifiesto
