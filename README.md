@@ -29,6 +29,11 @@ Al abrir el instalador, Android pide permiso para instalar apps de origen descon
 - Al cambiar el contenido hay que subir la fecha de `version` (formato AAAA-MM-DD) o la app no lo tomará como nuevo.
 - El contenido se redacta a partir de las normas y decisiones oficiales, con palabras propias.
 
+## La mascota
+
+- Tulio, el búho, es un personaje original de la app. Reacciona a cada respuesta, comenta el resultado de las pruebas y cuenta datos curiosos.
+- Los datos curiosos están en `datos`, dentro de `banco.js`: una lista de textos breves, en primera persona y verificables. Para agregar uno basta añadir un texto a la lista.
+
 ## Formato de las lecciones
 
 - Cada lección tiene `a` (área), `t` (título), `p` (puntos), `ej` (caso práctico) y `ojo` (error frecuente).

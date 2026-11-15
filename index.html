@@ -150,7 +150,22 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
 .cal i.on{background:var(--accent)} .cal i.today{outline:2px solid var(--ink);outline-offset:2px}
 .arearow{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-weight:600;font-size:15px}
 .arearow .bar{grid-column:1/-1}
-@media (prefers-reduced-motion: reduce){ button,.btn{transition:none} }
+/* Tulio, el búho */
+.tulio{display:grid;grid-template-columns:68px 1fr;gap:12px;align-items:end}
+.tulio.grande{grid-template-columns:92px 1fr}
+.owl{display:block;width:100%;height:auto;transform-origin:50% 100%}
+.owl.ok{animation:salto .6s ease-out} .owl.no{animation:niega .6s ease-in-out} .owl.habla{animation:mece 3.2s ease-in-out infinite}
+.owl .ojo{transform-box:fill-box;transform-origin:center;animation:parpadeo 4.6s infinite}
+.globo{position:relative;background:var(--paper);border:1.5px solid var(--line);border-radius:14px 14px 14px 4px;padding:11px 13px;display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.globo::before{content:"";position:absolute;left:-8px;bottom:9px;width:13px;height:13px;background:var(--paper);border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);transform:rotate(45deg)}
+.globo small{font:700 11px/1.2 var(--text);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.globo small.ok{color:var(--good)} .globo small.no{color:var(--bad)}
+.globo p{font-weight:600;line-height:1.4}
+@keyframes salto{0%{transform:translateY(0)}35%{transform:translateY(-9px) scale(1.04)}65%{transform:translateY(0)}82%{transform:translateY(-3px)}100%{transform:translateY(0)}}
+@keyframes niega{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}45%{transform:rotate(6deg)}70%{transform:rotate(-4deg)}}
+@keyframes mece{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+@keyframes parpadeo{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion: reduce){ button,.btn{transition:none} .owl,.owl .ojo{animation:none!important} }
 @media (max-width:520px){ .top .sub{display:none} .top .btn,.top button{padding:8px 10px;font-size:13px} }
 @media (max-width:420px){ .hero h2{font-size:25px} .stat b{font-size:28px} .score .big{font-size:50px} }
 </style>
@@ -186,7 +201,7 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
   <section class="card" id="result" hidden>
     <h2 id="rsTitle"></h2>
     <div class="score"><span class="big" id="rsPct"></span><div><p style="font-weight:700;font-size:18px" id="rsScore"></p><p class="sub">respuestas correctas</p></div></div>
-    <p id="rsMsg" style="font-weight:600"></p>
+    <div id="rsTulio"></div>
     <div id="rsWrong" style="display:flex;flex-direction:column;gap:12px"></div>
     <div class="row"><button class="primary" id="rsBack">Volver</button><button id="rsRetry" hidden>Repetir las falladas</button></div>
   </section>
@@ -229,6 +244,14 @@ ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
       </div>
       <p id="dayInfo"></p>
       <div class="row"><button class="primary" id="dayStart">Empezar la prueba de hoy</button><span id="dayDone" class="pill done" hidden></span></div>
+    </div>
+    <div class="card" style="--c:var(--gold)">
+      <div class="band">
+        <span class="tag">Dato curioso</span>
+        <h2>Tulio te cuenta</h2>
+      </div>
+      <div id="datoBox"></div>
+      <div class="row"><button id="datoOtro">Otro dato</button></div>
     </div>
     <p class="sub">Material de estudio. Cada pregunta cita la norma: confirma siempre el texto vigente antes de usarlo en un caso real.</p>
   </section>
@@ -495,7 +518,7 @@ function answer(o, btn) {
   if (!ok) btn.classList.add('no');
   paintSegs();
   const fb = $('qzFb'); fb.innerHTML = ''; fb.hidden = false;
-  fb.append(el('b', ok ? 'Correcto' : 'Incorrecto', ok ? 'ok' : 'no'), el('p', q.e), el('p', q.n, 'norma'));
+  fb.append(tulio(ok ? 'ok' : 'no', fraseDe(ok), ok ? 'Correcto' : 'Incorrecto'), el('p', q.e), el('p', q.n, 'norma'));
   if (q.l != null && B.lecciones[q.l]) fb.append(el('p', 'Se explica en la lección: ' + B.lecciones[q.l].t, 'norma'));
   $('qzNext').hidden = $('qzFlag').hidden = false;
   $('qzNext').textContent = Z.i + 1 < Z.list.length ? 'Siguiente' : 'Ver resultado';
@@ -511,8 +534,9 @@ function finishQuiz() {
   $('result').style.setProperty('--c', pct >= 80 ? 'var(--good)' : pct >= 60 ? 'var(--warn)' : 'var(--bad)');
   $('rsTitle').textContent = Z.title + ': resultado';
   $('rsScore').textContent = ok + ' / ' + n; $('rsPct').textContent = pct + '%';
-  $('rsMsg').textContent = Z.res.length < n ? 'Se acabó el tiempo: las preguntas sin responder cuentan como falladas.' :
+  const msg = Z.res.length < n ? 'Se acabó el tiempo: las preguntas sin responder cuentan como falladas.' :
     pct >= 80 ? 'Muy bien. Mañana vuelven solo las que necesiten repaso.' : pct >= 60 ? 'Vas bien. Las falladas volverán mañana para fijarlas.' : 'Hoy costó. Lee las explicaciones de abajo y repite las falladas.';
+  $('rsTulio').replaceChildren(tulio(Z.res.length < n ? '' : pct >= 80 ? 'ok' : pct >= 60 ? 'habla' : 'no', msg, 'Tulio dice', true));
   const wrong = Z.res.filter(r => !r.ok), box = $('rsWrong'); box.innerHTML = '';
   for (const r of wrong) {
     const d = el('div', null, 'fb');
@@ -554,6 +578,52 @@ $('rpShow').onclick = () => {
 };
 const rpGrade = ok => { grade(RP.shift(), ok); showRepaso(); };
 $('rpYes').onclick = () => rpGrade(true); $('rpNo').onclick = () => rpGrade(false);
+
+/* ---------- Tulio, el búho (personaje original de la app) ---------- */
+function owlSVG(m) {            // m: 'ok' | 'no' | 'habla' | ''
+  const N = '#101A2E', G = '#F2B544', y = m === 'no' ? 54 : 50;
+  const ojo = cx => m === 'ok'
+    ? `<path d="M${cx - 9} 53q9-12 18 0" fill="none" stroke="${N}" stroke-width="4.5" stroke-linecap="round"/>`
+    : `<g class="ojo"><circle cx="${cx}" cy="${y}" r="7" fill="${N}"/><circle cx="${cx + 2.4}" cy="${y - 2.6}" r="2.2" fill="#fff"/></g>`;
+  const ala = (izq) => `<path d="M22 60C9 72 11 95 27 101 24 88 24 74 22 60Z" fill="#22335C" transform="${izq ? '' : 'translate(120 0) scale(-1 1) '}${m === 'ok' ? 'rotate(48 22 62)' : ''}"/>`;
+  return `<svg class="owl ${m}" viewBox="0 0 120 120" role="img" aria-label="Tulio, el búho">
+<path d="M31 32 25 7 50 22Z M89 32 95 7 70 22Z" fill="#22335C"/>
+${ala(1)}${ala(0)}
+<path d="M60 15C28 15 19 42 19 66c0 30 18 46 41 46s41-16 41-46c0-24-9-51-41-51Z" fill="#34497F"/>
+<ellipse cx="60" cy="88" rx="25" ry="21" fill="#E8ECF5"/>
+<path d="M48 82q4 5 8 0M64 82q4 5 8 0M56 92q4 5 8 0" fill="none" stroke="#9AA6C2" stroke-width="2.2" stroke-linecap="round"/>
+<circle cx="42" cy="50" r="17.5" fill="#fff" stroke="${G}" stroke-width="3.5"/><circle cx="78" cy="50" r="17.5" fill="#fff" stroke="${G}" stroke-width="3.5"/>
+${ojo(42)}${ojo(78)}
+${m === 'no' ? `<path d="M27 34 49 28M93 34 71 28" stroke="${N}" stroke-width="4" stroke-linecap="round"/>` : ''}
+${m === 'habla' ? '<path d="M54.5 66h11L60 77Z" fill="#C98A1E"/>' : ''}
+<path d="M52 60h16l-8 ${m === 'habla' ? 9 : 12}Z" fill="${G}"/>
+<path d="M44 111q5-6 10 0ZM66 111q5-6 10 0Z" fill="${G}"/>
+</svg>`;
+}
+function tulio(mood, text, label, big) {
+  const d = el('div', null, 'tulio' + (big ? ' grande' : '')), g = el('div', null, 'globo');
+  d.innerHTML = owlSVG(mood);
+  if (label) g.append(el('small', label, mood === 'ok' || mood === 'no' ? mood : ''));
+  g.append(el('p', text)); d.append(g);
+  return d;
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const DICE_OK = ['¡Eso es! Lo tenías claro.', 'Correcto. Así se estudia.', '¡Muy bien! Se nota que leíste la lección.', 'Exacto. Esta ya quedó aprendida.', '¡Bien pensado!', 'Acertaste. Sigamos.'];
+const DICE_NO = ['Todavía no. Mira la explicación y la fijamos.', 'Casi. Esta vuelve mañana para repasarla.', 'No pasa nada: de los errores también se aprende.', 'No era esa. Lee con calma la explicación.', 'Esta costó. La repasamos juntos más adelante.'];
+function fraseDe(ok) {
+  let r = 0; for (let i = Z.res.length - 1; i >= 0 && Z.res[i].ok; i--) r++;
+  if (ok && r >= 3 && r % 3 === 0) return '¡' + r + ' seguidas! Vas con paso firme.';
+  return pick(ok ? DICE_OK : DICE_NO);
+}
+const DATOS_BASE = ['Me llamo Tulio por Marco Tulio Cicerón, el orador y jurista romano. Y soy búho porque el búho acompañaba a Minerva, la diosa de la sabiduría.', '«Jurisdicción» viene de iuris dictio: decir el derecho.', '«Apelar» viene de appellare: llamar al juez superior para que revise.'];
+let datoN = 0;
+function paintDato() {
+  const d = Array.isArray(B.datos) && B.datos.length ? B.datos : DATOS_BASE;
+  const i = (Math.floor(Date.now() / 864e5) + datoN) % d.length;
+  $('datoBox').replaceChildren(tulio('habla', d[i], '¿Sabías que…?', true));
+}
+$('datoOtro').onclick = () => { datoN++; paintDato(); };
+paintDato();
 
 /* ---------- Render ---------- */
 function render() {

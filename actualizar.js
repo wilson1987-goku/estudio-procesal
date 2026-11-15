@@ -22,6 +22,7 @@ for (const l of B.lecciones) if (!areas.has(l.a) || !l.t || !Array.isArray(l.p) 
 for (const c of B.programa) for (const a of c.areas) if (!areas.has(a)) errores.push('programa: área desconocida ' + a);
 for (const n of B.novedades) if (!n.f || !n.t || !n.d || !/^https:\/\//.test(n.u) || !areas.has(n.a)) errores.push('novedad inválida: ' + n.t);
 
+if (B.datos && (!Array.isArray(B.datos) || B.datos.some(d => typeof d !== 'string' || !d.trim()))) errores.push('datos debe ser una lista de textos');
 if (errores.length) { console.error(errores.join('\n')); process.exit(1); }
 fs.writeFileSync(path.join(__dirname, 'banco.json'), JSON.stringify(B));
 console.log(`OK: versión ${B.version}, ${B.preguntas.length} preguntas, ${B.lecciones.length} lecciones, ${B.novedades.length} novedades.`);

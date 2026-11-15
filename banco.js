@@ -1,7 +1,7 @@
 // Banco de estudio. En cada pregunta la PRIMERA opción es la correcta; la app las baraja.
 // Para actualizar: edita este archivo, cambia "version" y publica.
 window.BANCO = {
-version: "2026-11-15",
+version: "2026-11-15.2",
 areas: [
  {id:"tgp", n:"Principios y reglas generales"},
  {id:"comp", n:"Jurisdicción y competencia"},
@@ -985,6 +985,30 @@ programa: [
  {t:"Derecho Procesal Penal", areas:["pen"], d:"Sistema acusatorio: etapas, garantías y terminación anticipada.", lect:["Jaime Bernal Cuéllar y Eduardo Montealegre Lynett, El proceso penal","Ley 906 de 2004 con la reforma de la Ley 2477 de 2025"]},
  {t:"Derecho Procesal Laboral", areas:["lab"], d:"El nuevo código procesal del trabajo y de la seguridad social.", lect:["Ley 2452 de 2025 (los manuales anteriores a 2026 explican el código derogado)"]},
  {t:"Arbitraje, Conciliación y Justicia Digital", areas:["masc"], d:"Mecanismos alternativos y uso de tecnologías en el proceso.", lect:["Ramiro Bejarano Guzmán, Procesos declarativos, arbitrales y ejecutivos","Leyes 1563 de 2012, 2220 de 2022 y 2213 de 2022"]}
+],
+datos: [
+ "Me llamo Tulio por Marco Tulio Cicerón, el orador y jurista romano. Y soy búho porque el búho acompañaba a Minerva, la diosa de la sabiduría.",
+ "La palabra «proceso» viene del latín processus: avanzar, ir hacia adelante. Por eso un proceso no debe quedarse quieto.",
+ "«Jurisdicción» viene de iuris dictio: decir el derecho. El juez es, literalmente, quien dice el derecho en el caso concreto.",
+ "«Sentencia» viene del latín sententia, de sentire: es lo que el juez siente y opina después de oír a las partes.",
+ "«Demanda» viene del latín demandare, que significa encomendar: el demandante le confía su asunto al juez.",
+ "«Apelar» viene de appellare: llamar o dirigirse a otro. Quien apela llama al juez superior para que revise.",
+ "«Recurso» viene de recursus: volver a correr el camino. Con un recurso se vuelve sobre lo ya decidido.",
+ "«Notificar» viene de notum facere: hacer conocido. Una providencia no produce efectos hasta que se da a conocer.",
+ "«Preclusión» viene de praecludere: cerrar. Cada etapa del proceso se cierra para que la siguiente pueda avanzar.",
+ "«Monitorio» viene de monere: advertir. En ese proceso el juez advierte al deudor que pague o explique por qué no debe.",
+ "«Exequátur» significa en latín «que se ejecute». Es el permiso para que una sentencia extranjera valga en Colombia.",
+ "«Ad litem» significa «para el pleito». El curador ad litem representa a alguien solo dentro de ese proceso.",
+ "«Hábeas corpus» significa «que tengas el cuerpo»: la orden de presentar a la persona detenida ante el juez. En Colombia se resuelve en 36 horas.",
+ "«Casación» viene del francés casser: romper. Nació en Francia tras la Revolución, como un tribunal para anular sentencias contrarias a la ley.",
+ "«Litisconsorcio» une litis, pleito, y consortium, suerte común: varias personas que comparten la suerte de un mismo proceso.",
+ "La acción de tutela nació con la Constitución de 1991. Puede presentarse sin abogado, incluso de forma verbal, y debe fallarse en diez días.",
+ "El Código General del Proceso tiene 627 artículos y unificó el procedimiento civil, comercial, de familia y agrario.",
+ "El Código de Procedimiento Civil de 1970 rigió más de cuarenta años antes de ser reemplazado por el Código General del Proceso.",
+ "El código procesal laboral de 1948 rigió más de siete décadas. Su reemplazo, la Ley 2452 de 2025, empezó a regir en abril de 2026.",
+ "La «litis contestatio» del proceso romano era el momento en que quedaba fijado el litigio. De ahí viene que hoy se hable de contestar la demanda.",
+ "En las imágenes romanas, la Justicia aparece con los ojos descubiertos. La venda, símbolo de imparcialidad, se le añadió muchos siglos después.",
+ "La expresión «sana crítica» es de origen español: aparece en la Ley de Enjuiciamiento Civil de 1855 para la valoración de los testigos."
 ],
 fuentes: [
 {t:"Corte Constitucional: relatoría y comunicados", u:"https://www.corteconstitucional.gov.co/relatoria/"},
