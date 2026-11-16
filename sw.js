@@ -1,6 +1,6 @@
 // Guarda la app para usarla sin conexion; con conexion siempre trae la version mas nueva.
-const CACHE = 'estudio-procesal-v3';
-const FILES = ['./', 'index.html', 'banco.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-180.png', 'fonts/bricolage.woff2', 'fonts/figtree.woff2'];
+const CACHE = 'estudio-procesal-v4';
+const FILES = ['./', 'index.html', 'banco.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-180.png', 'fonts/newsreader.woff2', 'fonts/newsreader-italic.woff2', 'fonts/inter-tight.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
